@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The CDStore 💿</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
+        body { font-family: Times New Roman, sans-serif; text-align: center; margin: 0; padding: 0; }
         #search { width: 50%; padding: 10px; margin: 10px auto; }
         .music-item { 
             margin: 15px auto; 
@@ -86,7 +86,7 @@
             margin-bottom: 10px;
             font-size: 18px;
         }
-        .seek-bar {
+        .volume-bar {
             width: 100%;
             max-width: 400px;
             margin-top: 10px;
@@ -104,7 +104,7 @@
             <source id="audio-source" src="" type="audio/mp3">
             Your browser does not support the audio element.
         </audio>
-        <input type="range" id="seek-bar" class="seek-bar" value="0" step="1" min="0" max="100">
+        <input type="range" id="volume-bar" class="volume-bar" value="100" step="1" min="0" max="100">
     </div>
 
     <script>
@@ -153,20 +153,15 @@
                                     <img class="album-art-large" src="${albumArt}" alt="Album Art">
                                     <div class="movement-info">
                                         <h4 style="margin-left: 20px;">${movementTitle}</h4>
-                                        <audio class="movement-audio">
-                                            <source src="${mp3Url}" type="audio/mp3">
-                                            Your browser does not support the audio element.
-                                        </audio>
                                     </div>
                                 `;
                                 movementsContainer.appendChild(movementItem);
 
-                                // Remove audio controls from the expandable list
-                                const movementAudio = movementItem.querySelector('.movement-audio');
-                                movementAudio.removeAttribute('controls');
-                                movementAudio.addEventListener('play', () => {
+                                // Make song title clickable
+                                const movementTitleElement = movementItem.querySelector('h4');
+                                movementTitleElement.addEventListener('click', () => {
                                     updateCurrentSong(movementTitle, mp3Url);
-                                    setupSeekBar(movementAudio);
+                                    setupAudioPlayer();
                                 });
                             });
                         });
@@ -198,17 +193,13 @@
             audioPlayer.play();
         }
 
-        function setupSeekBar(audio) {
-            const seekBar = document.getElementById('seek-bar');
+        function setupAudioPlayer() {
+            const audioPlayer = document.getElementById('audio-player');
+            const volumeBar = document.getElementById('volume-bar');
 
-            audio.addEventListener('timeupdate', () => {
-                const progress = (audio.currentTime / audio.duration) * 100;
-                seekBar.value = progress;
-            });
-
-            seekBar.addEventListener('input', () => {
-                const newTime = (seekBar.value / 100) * audio.duration;
-                audio.currentTime = newTime;
+            // Volume control
+            volumeBar.addEventListener('input', () => {
+                audioPlayer.volume = volumeBar.value / 100;
             });
         }
 
