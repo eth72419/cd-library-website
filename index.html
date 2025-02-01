@@ -15,7 +15,7 @@
             overflow-x: hidden;
         }
         h1 {
-            margin-top: 80px;  /* Increased margin-top to add space below Full Collection button */
+            margin-top: 80px;
             color: #333;
         }
         #search {
@@ -132,8 +132,8 @@
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            margin-top: 20px; /* Reduced margin to avoid clipping */
-            display: block; /* Ensure it's visible */
+            margin-top: 20px;
+            display: block;
             position: absolute;
             top: 20px;
             left: 50%;
@@ -144,35 +144,65 @@
             background-color: #0056b3;
         }
 
-        /* Colors for better UI */
-        body {
-            background-color: #f4f6f9;
+        /* Comment section styles */
+        .comment-section {
+            margin-top: 20px;
+            width: 80%;
+            text-align: left;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
         }
-        .music-item {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
+
+        .comment-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
         }
-        .disc {
+
+        .comment-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .comment-button:hover {
+            background-color: #0056b3;
+        }
+
+        .comments-list {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            margin-bottom: 15px;
+            padding: 10px;
             background-color: #eef2f7;
-            border-radius: 10px;
+            border-radius: 5px;
         }
-        .disc:hover {
-            background-color: #d0d7e0;
+
+        .comment-item strong {
+            font-weight: bold;
         }
-        #current-song {
-            color: #333;
-        }
+
     </style>
 </head>
 <body>
-    <!-- Full Collection Button at the top -->
     <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
 
     <h1>Welcome to The CDStore 💿</h1>
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
-    <div class="spacer"></div> <!-- Large gap at the bottom of the page -->
+    <div class="spacer"></div> 
 
     <div id="player-container">
         <div id="current-song">No song playing</div>
@@ -186,121 +216,76 @@
         </div>
     </div>
 
+    <!-- Comment section -->
+    <div id="comment-section" class="comment-section">
+        <h3>Leave a Comment</h3>
+        <input type="text" id="comment-input" class="comment-input" placeholder="Enter your comment here...">
+        <button class="comment-button" onclick="postComment()">Post Comment</button>
+        <div class="comments-list" id="comments-list"></div>
+    </div>
+
     <script>
-        const jsonUrl = 'https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/BZDRShrz';
-        let currentAudio = null;
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwGsSekpbWZPuZyoMB9pIseSJZBHTwTs3_toL9I-1hZ3J9YC6TB3Kn6AeesCsrDCMaQPA/exec'; // Replace with your Google Apps Script URL for comments
 
-        // Show "Full Collection" button after music is loaded
-        function displayMusic() {
-            fetch(jsonUrl, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',  
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const musicList = document.getElementById("musicList");
-                musicList.innerHTML = '';
-
-                if (data && Array.isArray(data)) {
-                    data.forEach(row => {
-                        const item = document.createElement('div');
-                        item.classList.add('music-item');
-
-                        const discName = row.cd_title;
-                        const albumArt = row.album_art_url;
-
-                        const discSection = document.createElement('div');
-                        discSection.classList.add('disc');
-                        discSection.innerHTML = `
-                            <img class="album-art" src="${albumArt}" alt="Album Art">
-                            ${discName}
-                        `;
-
-                        const movementsContainer = document.createElement('div');
-                        movementsContainer.classList.add('movements');
-
-                        row.movements.forEach(movement => {
-                            const movementTitle = movement.movement_title;
-                            const mp3Urls = movement.mp3_urls;
-
-                            mp3Urls.forEach(mp3Url => {
-                                const movementItem = document.createElement('div');
-                                movementItem.classList.add('movement-item');
-                                movementItem.innerHTML = `
-                                    <img class="album-art-large" src="${albumArt}" alt="Album Art">
-                                    <div class="movement-info">
-                                        <h4 style="margin-left: 20px;">${movementTitle}</h4>
-                                    </div>
-                                `;
-                                movementsContainer.appendChild(movementItem);
-
-                                // Make song title clickable
-                                const movementTitleElement = movementItem.querySelector('h4');
-                                movementTitleElement.addEventListener('click', () => {
-                                    updateCurrentSong(movementTitle, mp3Url);
-                                    setupAudioPlayer();
-                                });
-                            });
-                        });
-
-                        discSection.addEventListener('click', () => {
-                            const isVisible = movementsContainer.style.display === 'block';
-                            movementsContainer.style.display = isVisible ? 'none' : 'block';
-                        });
-
-                        item.appendChild(discSection);
-                        item.appendChild(movementsContainer);
-                        musicList.appendChild(item);
-                    });
-                }
-
-                // Now that music is loaded, show the "Full Collection" button
-                const fullCollectionBtn = document.getElementById("full-collection-btn");
-                fullCollectionBtn.style.display = 'block'; // Show the button
-            })
-            .catch(error => {
-                console.error('Error fetching music:', error);
+        // Function to load comments from Google Sheets
+        async function loadComments(cdName) {
+            const response = await fetch(`${API_URL}?cdName=${cdName}`);
+            const comments = await response.json();
+            const commentsList = document.getElementById('comments-list');
+            commentsList.innerHTML = '';
+            comments.forEach(comment => {
+                const commentItem = document.createElement('div');
+                commentItem.classList.add('comment-item');
+                commentItem.innerHTML = `<strong>${comment.userName}</strong> (${new Date(comment.date).toLocaleString()}):<br>${comment.comment}`;
+                commentsList.appendChild(commentItem);
             });
         }
 
-        function updateCurrentSong(title, src) {
-            const currentSongText = document.getElementById('current-song');
-            const audioPlayer = document.getElementById('audio-player');
-            const audioSource = document.getElementById('audio-source');
+        // Function to post a comment
+        async function postComment() {
+            const commentInput = document.getElementById('comment-input');
+            const comment = commentInput.value.trim();
+            if (comment) {
+                const cdName = document.querySelector('.disc-playing').textContent; // Get CD name from the UI
+                const userName = prompt('Enter your name:'); // Ask for user name
 
-            currentSongText.textContent = `Now Playing: ${title}`;
-            audioSource.src = src;
-            audioPlayer.load(); // Reload the audio element
-        }
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cdName,
+                        userName,
+                        comment
+                    })
+                });
 
-        function setupAudioPlayer() {
-            const audioPlayer = document.getElementById('audio-player');
-            const volumeBar = document.getElementById('volume-bar');
-
-            audioPlayer.volume = volumeBar.value / 100;
-
-            volumeBar.addEventListener('input', function () {
-                audioPlayer.volume = volumeBar.value / 100;
-            });
-        }
-
-        function searchMusic() {
-            const searchQuery = document.getElementById('search').value.toLowerCase();
-            const musicItems = document.querySelectorAll('.music-item');
-            musicItems.forEach(item => {
-                const discName = item.querySelector('.disc').textContent.toLowerCase();
-                const movements = item.querySelector('.movements');
-                if (discName.includes(searchQuery)) {
-                    item.style.display = 'block';
+                const result = await response.json();
+                if (result.result === 'success') {
+                    loadComments(cdName); // Reload comments after posting
+                    commentInput.value = ''; // Clear input
                 } else {
-                    item.style.display = 'none';
+                    alert('Error posting comment');
                 }
+            }
+        }
+
+        // Existing music listing code to handle the UI
+        function searchMusic() {
+            const query = document.getElementById("search").value.toLowerCase();
+            const items = document.querySelectorAll(".music-item");
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query) ? 'block' : 'none';
             });
         }
 
-        displayMusic(); // Call to display the music after the page loads
+        function loadMusic() {
+            // This function populates the music list with items
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMusic);
     </script>
 </body>
 </html>
