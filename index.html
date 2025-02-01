@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Library</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/audiojs/dist/audiojs.css"> <!-- Include Audio.js CSS -->
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
@@ -27,10 +28,6 @@
         .music-info { 
             text-align: left;
             width: 100%;
-        }
-        audio { 
-            width: 100%; 
-            margin-top: 10px; 
         }
         .disc { 
             margin: 10px 0; 
@@ -63,22 +60,17 @@
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
+    <!-- Include Audio.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/audiojs/dist/audio.min.js"></script>
     <script>
         // URL to your hosted JSON TXT file
-        const jsonUrl = 'https://raw.githubusercontent.com/eth72419/cd-library-website/refs/heads/main/database.txt?token=GHSAT0AAAAAAC6HNIE7BFSTVNL2MPHOWZHWZ46LZHA';  // Replace with the actual URL of your hosted JSON file
+        const jsonUrl = 'https://github.com/eth72419/cd-library-website/raw/refs/heads/main/database.txt';  // Replace with the actual URL of your hosted JSON file
 
         // Function to display music from the hosted JSON file
         function displayMusic() {
             fetch(jsonUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();  // Parse the JSON data from the file
-                })
+                .then(response => response.json())  // Parse the JSON data from the file
                 .then(data => {
-                    console.log(data);  // Log the data to check if it's being fetched correctly
-
                     const musicList = document.getElementById("musicList");
                     musicList.innerHTML = ''; // Clear previous music list
                     data.forEach(row => {
@@ -106,14 +98,16 @@
                             mp3Urls.forEach(mp3Url => {
                                 const movementItem = document.createElement('div');
                                 movementItem.classList.add('movement-item');
-                                movementItem.innerHTML = `
+                                movementItem.innerHTML = ` 
                                     <img class="album-art" src="${albumArt}" alt="Album Art">
                                     <div class="music-info">
                                         <h4>${movementTitle}</h4>
-                                        <audio controls>
-                                            <source src="${mp3Url}" type="audio/mp3">
-                                            Your browser does not support the audio element.
-                                        </audio>
+                                        <div class="audiojs-player">
+                                            <audio class="audiojs" preload="none">
+                                                <source src="${mp3Url}" type="audio/mp3">
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        </div>
                                     </div>
                                 `;
                                 movementsContainer.appendChild(movementItem);
@@ -130,10 +124,17 @@
                         item.appendChild(movementsContainer);
                         musicList.appendChild(item);
                     });
+
+                    // Initialize Audio.js for all audio elements after loading content
+                    audiojs.events.ready(function() {
+                        const players = document.querySelectorAll('.audiojs');
+                        players.forEach((player) => {
+                            audiojs.create(player);
+                        });
+                    });
                 })
                 .catch(error => {
                     console.error('Error fetching music:', error);
-                    alert('There was an error fetching the music data. Please check the console for details.');
                 });
         }
 
