@@ -72,28 +72,6 @@
       movementsContainer.appendChild(newMovement);
     }
 
-    // Function to upload music data to Google Sheets
-    function uploadMusic() {
-      const title = document.getElementById("title").value;
-      const composer = document.getElementById("composer").value;
-      const albumArt = document.getElementById("albumArt").value;
-      const movements = [];
-
-      // Collect movement names and links
-      const movementNames = document.querySelectorAll(".movement-name");
-      const movementLinks = document.querySelectorAll(".movement-link");
-
-      for (let i = 0; i < movementNames.length; i++) {
-        const movementName = movementNames[i].value;
-        const movementLink = movementLinks[i].value;
-
-        if (movementName && movementLink) {
-          movements.push({
-            name: movementName,
-            link: movementLink
-          });
-        }
-      }
 
       const musicData = {
         title,
