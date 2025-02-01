@@ -21,118 +21,93 @@
         <h2>Upload Music</h2>
         <input type="text" id="title" placeholder="Music Title">
         <input type="text" id="composer" placeholder="Composer">
-        <input type="text" id="driveLink" placeholder="Music URL (Google Drive or other)">
+        <input type="text" id="driveLink" placeholder="Google Drive Link">
         <button onclick="uploadMusic()">Upload</button>
     </div>
     
-    <!-- Firebase App and Firestore SDKs -->
+    <!-- Include Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <script>
-        // Firebase configuration
+        // Your Firebase config object (replace with your actual Firebase config)
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Replace with your actual API key
-            authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual authDomain
-            projectId: "YOUR_PROJECT_ID", // Replace with your actual projectId
-            storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual storageBucket
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your messagingSenderId
-            appId: "YOUR_APP_ID", // Replace with your appId
-            measurementId: "YOUR_MEASUREMENT_ID" // Replace with your measurementId
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app); // Initialize Firestore
+        const db = firebase.firestore(); // Initialize Firestore
 
-        // Function to upload music
+        // Fetch and display the music data
+        async function loadMusic() {
+            try {
+                const querySnapshot = await db.collection("music").get();
+                const musicData = querySnapshot.docs.map(doc => doc.data());
+                displayMusic(musicData);
+            } catch (error) {
+                console.error("Error loading music:", error);
+            }
+        }
+
+        function displayMusic(list) {
+            let musicList = document.getElementById("musicList");
+            musicList.innerHTML = "";
+            list.forEach(track => {
+                let item = document.createElement("div");
+                item.className = "music-item";
+                item.innerHTML = `
+                    <h3>${track.title} - ${track.composer}</h3>
+                    <audio controls>
+                        <source src="${track.link}" type="audio/mp3">
+                        Your browser does not support the audio element.
+                    </audio>
+                `;
+                musicList.appendChild(item);
+            });
+        }
+
+        // Upload new music
         function uploadMusic() {
-            const title = document.getElementById("title").value;
-            const composer = document.getElementById("composer").value;
-            const link = document.getElementById("driveLink").value;
-
+            let title = document.getElementById("title").value;
+            let composer = document.getElementById("composer").value;
+            let link = document.getElementById("driveLink").value;
+            
             if (title && composer && link) {
-                // Add music to Firestore
                 db.collection("music").add({
                     title: title,
                     composer: composer,
                     link: link
-                })
-                .then((docRef) => {
-                    console.log("Document written with ID: ", docRef.id);
-                    alert("Music uploaded!");
-                    // Clear the input fields
-                    document.getElementById("title").value = "";
-                    document.getElementById("composer").value = "";
-                    document.getElementById("driveLink").value = "";
-                    // Hide the upload form
+                }).then(() => {
+                    alert("Music uploaded successfully!");
+                    loadMusic(); // Refresh the music list
                     document.getElementById("uploadForm").style.display = 'none';
-                    // Reload music list
-                    loadMusic();
-                })
-                .catch((error) => {
-                    console.error("Error adding document: ", error);
+                }).catch(error => {
+                    console.error("Error uploading music:", error);
                 });
             } else {
                 alert("Please fill in all fields!");
             }
         }
 
-        // Function to load music from Firestore
-        function loadMusic() {
-            db.collection("music").get().then((querySnapshot) => {
-                const musicList = document.getElementById("musicList");
-                musicList.innerHTML = ""; // Clear the list first
-
-                querySnapshot.forEach((doc) => {
-                    const track = doc.data();
-                    let item = document.createElement("div");
-                    item.className = "music-item";
-                    item.innerHTML = `
-                        <h3>${track.title} - ${track.composer}</h3>
-                        <audio controls>
-                            <source src="${track.link}" type="audio/mp3">
-                            Your browser does not support the audio element.
-                        </audio>
-                    `;
-                    musicList.appendChild(item);
-                });
-            }).catch((error) => {
-                console.error("Error getting documents: ", error);
-            });
-        }
-
-        // Function to search music
+        // Search function
         function searchMusic() {
-            const query = document.getElementById("search").value.toLowerCase();
-            db.collection("music").get().then((querySnapshot) => {
-                const musicList = document.getElementById("musicList");
-                musicList.innerHTML = ""; // Clear the list first
-
-                querySnapshot.forEach((doc) => {
-                    const track = doc.data();
-                    if (track.title.toLowerCase().includes(query) || track.composer.toLowerCase().includes(query)) {
-                        let item = document.createElement("div");
-                        item.className = "music-item";
-                        item.innerHTML = `
-                            <h3>${track.title} - ${track.composer}</h3>
-                            <audio controls>
-                                <source src="${track.link}" type="audio/mp3">
-                                Your browser does not support the audio element.
-                            </audio>
-                        `;
-                        musicList.appendChild(item);
-                    }
-                });
-            }).catch((error) => {
-                console.error("Error getting documents: ", error);
-            });
+            let query = document.getElementById("search").value.toLowerCase();
+            let filtered = musicData.filter(m => 
+                m.title.toLowerCase().includes(query) ||
+                m.composer.toLowerCase().includes(query)
+            );
+            displayMusic(filtered);
         }
 
-        // Load music on page load
-        window.onload = function() {
-            loadMusic();
-        }
+        // Load music when the page loads
+        loadMusic();
     </script>
 </body>
 </html>
