@@ -119,10 +119,10 @@
             color: #666;
         }
         .spacer {
-            height: 150px; /* Adjust this value to make the gap bigger or smaller */
+            height: 150px;
         }
 
-        /* New Full Collection Button */
+        /* Full Collection Button initially hidden */
         .full-collection-button {
             background-color: #007bff;
             color: white;
@@ -133,6 +133,7 @@
             cursor: pointer;
             text-decoration: none;
             margin-top: 30px;
+            display: none; /* Hidden initially */
         }
 
         .full-collection-button:hover {
@@ -164,8 +165,8 @@
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
-    <!-- Full Collection Button Moved Above Spacer -->
-    <a href="https://www.libib.com/u/cdlist" class="full-collection-button">Full Collection</a>
+    <!-- Full Collection Button initially hidden -->
+    <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
 
     <div class="spacer"></div> <!-- Large gap at the bottom of the page -->
 
@@ -185,6 +186,7 @@
         const jsonUrl = 'https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/BZDRShrz';
         let currentAudio = null;
 
+        // Show "Full Collection" button after music is loaded
         function displayMusic() {
             fetch(jsonUrl, {
                 method: 'GET',
@@ -249,6 +251,10 @@
                         musicList.appendChild(item);
                     });
                 }
+
+                // Now that music is loaded, show the "Full Collection" button
+                const fullCollectionBtn = document.getElementById("full-collection-btn");
+                fullCollectionBtn.style.display = 'inline-block'; // Show the button
             })
             .catch(error => {
                 console.error('Error fetching music:', error);
@@ -276,16 +282,4 @@
             });
         }
 
-        function searchMusic() {
-            const query = document.getElementById("search").value.toLowerCase();
-            const musicItems = document.querySelectorAll('.music-item');
-            musicItems.forEach(item => {
-                const title = item.querySelector('.disc').innerText.toLowerCase();
-                item.style.display = title.includes(query) ? 'block' : 'none';
-            });
-        }
-
-        displayMusic();
-    </script>
-</body>
-</html>
+        function search
