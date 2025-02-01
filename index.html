@@ -122,7 +122,7 @@
             height: 150px;
         }
 
-        /* Full Collection Button initially hidden */
+        /* Full Collection Button at the top */
         .full-collection-button {
             background-color: #007bff;
             color: white;
@@ -134,6 +134,10 @@
             text-decoration: none;
             margin-top: 30px;
             display: block; /* Ensure it's visible */
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .full-collection-button:hover {
@@ -161,12 +165,12 @@
     </style>
 </head>
 <body>
+    <!-- Full Collection Button at the top -->
+    <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
+
     <h1>Welcome to The CDStore 💿</h1>
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
-
-    <!-- Full Collection Button initially hidden -->
-    <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
 
     <div class="spacer"></div> <!-- Large gap at the bottom of the page -->
 
