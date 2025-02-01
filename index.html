@@ -144,13 +144,13 @@
             background-color: #0056b3;
         }
 
-        /* Sidebar Styling */
+        /* Sidebar Styling (Dark Mode) */
         #sidebar {
             position: fixed;
             top: 0;
-            left: -250px;
+            left: -300px;
             height: 100%;
-            width: 250px;
+            width: 300px;
             background-color: #333;
             color: white;
             overflow-y: auto;
@@ -180,6 +180,11 @@
             font-size: 14px;
         }
 
+        .comment-item .time {
+            font-size: 12px;
+            color: #bbb;
+        }
+
         /* Button to toggle sidebar */
         #sidebar-toggle {
             position: fixed;
@@ -196,6 +201,38 @@
         }
 
         #sidebar-toggle:hover {
+            background-color: #0056b3;
+        }
+
+        /* Comment Form Styling */
+        #comment-form {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #444;
+            border-radius: 8px;
+        }
+
+        #comment-form input,
+        #comment-form textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #comment-form button {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #comment-form button:hover {
             background-color: #0056b3;
         }
 
@@ -277,25 +314,25 @@
         </div>
     </div>
 
-    <!-- Sidebar to display comments -->
+    <!-- Sidebar to display comments and post new ones -->
     <div id="sidebar">
         <h2>Comments</h2>
         <div id="comment-list"></div>
+
+        <!-- Comment Form -->
+        <div id="comment-form">
+            <input type="text" id="name-input" placeholder="Enter your name">
+            <textarea id="comment-input" rows="4" placeholder="Leave a comment..."></textarea>
+            <button onclick="postComment()">Post Comment</button>
+        </div>
     </div>
 
     <!-- Button to toggle the sidebar -->
     <button id="sidebar-toggle" onclick="toggleSidebar()">☰ Comments</button>
 
-    <!-- Comment Section for posting comments -->
-    <div id="comment-section">
-        <input type="text" id="name-input" placeholder="Enter your name">
-        <textarea id="comment-input" rows="4" placeholder="Leave a comment..."></textarea>
-        <button onclick="postComment()">Post Comment</button>
-    </div>
-
     <script>
         const jsonUrl = 'https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/BZDRShrz';
-        const googleSheetUrl = 'YOUR_GOOGLE_SHEET_URL_HERE'; // Replace with your Google Sheets API endpoint URL
+        const googleSheetUrl = 'https://script.google.com/macros/s/AKfycbwGsSekpbWZPuZyoMB9pIseSJZBHTwTs3_toL9I-1hZ3J9YC6TB3Kn6AeesCsrDCMaQPA/exec'; // Replace with your Google Sheets API endpoint URL
         let currentAudio = null;
 
         // Show "Full Collection" button after music is loaded
@@ -312,106 +349,52 @@
                     data.forEach(row => {
                         const item = document.createElement('div');
                         item.classList.add('music-item');
-
-                        const discName = row.cd_title;
-                        const albumArt = row.album_art_url;
-
-                        const discSection = document.createElement('div');
-                        discSection.classList.add('disc');
-                        discSection.innerHTML = `
-                            <img class="album-art" src="${albumArt}" alt="Album Art">
-                            ${discName}
+                        item.innerHTML = `
+                            <img class="album-art-large" src="${row["Image"]}" alt="${row["CD Name"]}">
+                            <div class="disc" onclick="displayMovements('${row["CD Name"]}')">${row["CD Name"]}</div>
+                            <div class="movements" id="movements-${row["CD Name"]}"></div>
                         `;
-
-                        const movementsContainer = document.createElement('div');
-                        movementsContainer.classList.add('movements');
-
-                        row.movements.forEach(movement => {
-                            const movementTitle = movement.movement_title;
-                            const mp3Urls = movement.mp3_urls;
-
-                            mp3Urls.forEach(mp3Url => {
-                                const movementItem = document.createElement('div');
-                                movementItem.classList.add('movement-item');
-                                movementItem.innerHTML = `
-                                    <img class="album-art-large" src="${albumArt}" alt="Album Art">
-                                    <div class="movement-info">
-                                        <h4 style="margin-left: 20px;">${movementTitle}</h4>
-                                    </div>
-                                `;
-                                movementsContainer.appendChild(movementItem);
-
-                                // Make song title clickable
-                                const movementTitleElement = movementItem.querySelector('h4');
-                                movementTitleElement.addEventListener('click', () => {
-                                    updateCurrentSong(movementTitle, mp3Url);
-                                    setupAudioPlayer();
-                                });
-                            });
-                        });
-
-                        discSection.addEventListener('click', () => {
-                            const isVisible = movementsContainer.style.display === 'block';
-                            movementsContainer.style.display = isVisible ? 'none' : 'block';
-                        });
-
-                        item.appendChild(discSection);
-                        item.appendChild(movementsContainer);
                         musicList.appendChild(item);
                     });
                 }
-
-                // Now that music is loaded, show the "Full Collection" button
-                const fullCollectionBtn = document.getElementById("full-collection-btn");
-                fullCollectionBtn.style.display = 'block'; // Show the button
-            })
-            .catch(error => {
-                console.error('Error fetching music:', error);
             });
         }
 
-        function updateCurrentSong(title, src) {
-            const currentSongText = document.getElementById('current-song');
-            const audioPlayer = document.getElementById('audio-player');
-            const audioSource = document.getElementById('audio-source');
+        // Display movements for a given CD
+        function displayMovements(cdName) {
+            const movements = document.getElementById(`movements-${cdName}`);
+            const musicList = document.getElementById('musicList');
+            const cdData = musicList.querySelector(`[data-cd-name="${cdName}"]`);
 
-            currentSongText.textContent = `Now Playing: ${title}`;
-            audioSource.src = src;
-            audioPlayer.load(); // Reload the audio element
-        }
+            // Clear existing movements
+            movements.innerHTML = '';
 
-        function setupAudioPlayer() {
-            const audioPlayer = document.getElementById('audio-player');
-            const volumeBar = document.getElementById('volume-bar');
-
-            audioPlayer.volume = volumeBar.value / 100;
-
-            volumeBar.addEventListener('input', function () {
-                audioPlayer.volume = volumeBar.value / 100;
-            });
-        }
-
-        function searchMusic() {
-            const searchQuery = document.getElementById('search').value.toLowerCase();
-            const musicItems = document.querySelectorAll('.music-item');
-            musicItems.forEach(item => {
-                const discName = item.querySelector('.disc').textContent.toLowerCase();
-                const movements = item.querySelector('.movements');
-                if (discName.includes(searchQuery)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
+            fetch(jsonUrl)
+            .then(response => response.json())
+            .then(data => {
+                const cdInfo = data.find(cd => cd["CD Name"] === cdName);
+                if (cdInfo) {
+                    const movementsList = cdInfo["Movements"];
+                    movementsList.forEach(movement => {
+                        const movementItem = document.createElement('div');
+                        movementItem.classList.add('movement-item');
+                        movementItem.innerHTML = `
+                            <h4>${movement}</h4>
+                        `;
+                        movements.appendChild(movementItem);
+                    });
+                    movements.style.display = 'block';
                 }
             });
         }
 
-        // Post a comment to the Google Sheet
+        // Post a comment
         function postComment() {
             const nameInput = document.getElementById('name-input');
             const commentInput = document.getElementById('comment-input');
-            const name = nameInput ? nameInput.value : ''; 
+            const name = nameInput ? nameInput.value : '';
             const comment = commentInput ? commentInput.value : '';
-            
+
             if (!name || !comment) {
                 alert("Both name and comment are required.");
                 return;
@@ -426,7 +409,7 @@
                     }
                 })
                 .catch(error => console.error('Error posting comment:', error));
-            
+
             nameInput.value = '';
             commentInput.value = '';
         }
@@ -439,15 +422,18 @@
             // Clear the existing comments in the sidebar
             commentList.innerHTML = '';
 
-            fetch(googleSheetUrl) 
+            fetch(googleSheetUrl)
                 .then(response => response.json())
                 .then(data => {
                     data.forEach(comment => {
                         const commentItem = document.createElement('div');
                         commentItem.classList.add('comment-item');
+                        const date = new Date(comment.timestamp);
+                        const time = `${date.getHours()}:${date.getMinutes()}`;
                         commentItem.innerHTML = `
                             <p><strong>${comment.name}</strong> says:</p>
                             <p>${comment.comment}</p>
+                            <p class="time">Posted at ${time}</p>
                         `;
                         commentList.appendChild(commentItem);
                     });
