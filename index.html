@@ -8,24 +8,34 @@
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
         .music-item { 
-            margin: 10px; 
-            padding: 10px; 
+            margin: 15px; 
+            padding: 15px; 
             border: 1px solid #ccc; 
             display: flex; 
-            align-items: center; /* Center album art and player vertically */
-            justify-content: flex-start; /* Align items to the left */
+            align-items: center; /* Center content vertically */
+            justify-content: flex-start; /* Align content to the left */
+            max-width: 1000px; /* Prevent the items from stretching too much */
+            margin-left: auto;
+            margin-right: auto;
         }
         .album-art { 
-            width: 80px; /* Set a fixed width for album art */
-            height: 80px; /* Set a fixed height for album art */
-            margin-right: 10px; /* Reduced margin between album art and media player */
+            width: 150px; /* Set larger width for album art */
+            height: 150px; /* Set square height for album art */
+            object-fit: cover; /* Ensure the image doesn't get stretched or squished */
+            margin-right: 20px; /* Add space between the image and audio player */
         }
         .music-info { 
             text-align: left;
-            max-width: 300px; /* Limit width of music info to avoid text overflow */
+            max-width: 500px; /* Limit width of music info */
+            width: 100%; /* Allow the info section to take the available space */
         }
         audio { 
             width: 100%; /* Make the audio player fill the available space */
+            margin-top: 10px; /* Add space between the title/composer and the player */
+        }
+        h3 {
+            margin: 0;
+            padding: 0;
         }
     </style>
 </head>
