@@ -12,41 +12,60 @@
             padding: 15px; 
             border: 1px solid #ccc; 
             display: flex; 
-            align-items: center; /* Center content vertically */
-            justify-content: flex-start; /* Align content to the left */
-            max-width: 1000px; /* Prevent the items from stretching too much */
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center content horizontally */
+            max-width: 1000px;
             margin-left: auto;
             margin-right: auto;
         }
         .album-art { 
-            width: 150px; /* Set larger width for album art */
-            height: 150px; /* Set square height for album art */
-            object-fit: cover; /* Ensure the image doesn't get stretched or squished */
-            margin-right: 20px; /* Add space between the image and audio player */
+            width: 150px; 
+            height: 150px; 
+            object-fit: cover; 
+            margin-bottom: 15px;
         }
         .music-info { 
             text-align: left;
-            max-width: 500px; /* Limit width of music info */
-            width: 100%; /* Allow the info section to take the available space */
+            width: 100%;
         }
         audio { 
-            width: 100%; /* Make the audio player fill the available space */
-            margin-top: 10px; /* Add space between the title/composer and the player */
+            width: 100%; 
+            margin-top: 10px; 
         }
-        h3 {
-            margin: 0;
-            padding: 0;
+        .disc { 
+            margin: 10px 0; 
+            cursor: pointer; 
+            font-weight: bold;
+            padding: 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .movements { 
+            margin-top: 10px;
+            display: none; 
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: left;
+        }
+        .movement-item {
+            display: flex; 
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .movement-item audio {
+            margin-left: 15px;
+            width: 80%; /* Audio player width adjusted */
         }
     </style>
 </head>
 <body>
     <h1>My Music Library</h1>
-    <input type="text" id="search" placeholder="Search by composer or name..." onkeyup="searchMusic()">
+    <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
     <script>
         const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';  // Your Google Apps Script Web App URL
-        
+
         // Function to display music from Google Sheets
         function displayMusic() {
             fetch(appUrl)
@@ -57,16 +76,53 @@
                     data.forEach(row => {
                         const item = document.createElement('div');
                         item.classList.add('music-item');
-                        item.innerHTML = `
-                            <img class="album-art" src="${row[3]}" alt="Album Art">
-                            <div class="music-info">
-                                <h3>${row[0]} - ${row[1]}</h3>
-                                <audio controls>
-                                    <source src="${row[2]}" type="audio/mp3">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
-                        `;
+
+                        const discName = row[4]; // Get CD Disc
+                        const albumArt = row[3]; // Get album art URL
+                        const link = row[2]; // Get general link (Google Drive link for the entire album)
+                        
+                        // Create collapsible disc section
+                        const discSection = document.createElement('div');
+                        discSection.classList.add('disc');
+                        discSection.innerHTML = `${row[0]} - ${discName}`;
+
+                        // Create a container for movements
+                        const movementsContainer = document.createElement('div');
+                        movementsContainer.classList.add('movements');
+                        
+                        // Loop through movements (Track Title and Track URL)
+                        let trackCount = 5; // Start from 5th column, as CD Title is in column 0
+                        let movementIndex = 1;
+                        while (trackCount < row.length) {
+                            const trackTitle = row[trackCount];
+                            const trackUrl = row[trackCount + 1];
+                            if (trackTitle && trackUrl) {
+                                const movementItem = document.createElement('div');
+                                movementItem.classList.add('movement-item');
+                                movementItem.innerHTML = `
+                                    <img class="album-art" src="${albumArt}" alt="Album Art">
+                                    <div class="music-info">
+                                        <h4>${trackTitle}</h4>
+                                        <audio controls>
+                                            <source src="${trackUrl}" type="audio/mp3">
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    </div>
+                                `;
+                                movementsContainer.appendChild(movementItem);
+                            }
+                            trackCount += 2; // Move to next track (skip two columns, one for title, one for URL)
+                            movementIndex++;
+                        }
+
+                        // Append the collapsible section with movements
+                        discSection.addEventListener('click', () => {
+                            const isVisible = movementsContainer.style.display === 'block';
+                            movementsContainer.style.display = isVisible ? 'none' : 'block';
+                        });
+
+                        item.appendChild(discSection);
+                        item.appendChild(movementsContainer);
                         musicList.appendChild(item);
                     });
                 })
@@ -75,19 +131,16 @@
                 });
         }
 
-        // Function to search music by title or composer
+        // Function to search music based on input
         function searchMusic() {
             const query = document.getElementById("search").value.toLowerCase();
             const musicItems = document.querySelectorAll('.music-item');
-
             musicItems.forEach(item => {
-                const title = item.querySelector('h3').textContent.toLowerCase();
-                
-                // Check if the title or composer matches the search query
+                const title = item.querySelector('.disc').innerText.toLowerCase();
                 if (title.includes(query)) {
-                    item.style.display = 'flex'; // Show the item if it matches
+                    item.style.display = 'block';
                 } else {
-                    item.style.display = 'none'; // Hide the item if it doesn't match
+                    item.style.display = 'none';
                 }
             });
         }
