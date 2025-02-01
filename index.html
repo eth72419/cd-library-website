@@ -7,58 +7,68 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
-        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; display: flex; align-items: center; }
-        .music-item img { margin-right: 20px; }
-        .music-item h3 { cursor: pointer; }
-        .movements { padding-left: 20px; }
+        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
+        .music-info { max-width: 600px; }
+        img { max-height: 150px; max-width: 150px; margin-right: 20px; }
+        audio { width: 100%; }
     </style>
 </head>
 <body>
     <h1>My Music Library</h1>
-    <input type="text" id="search" placeholder="Search by CD name..." onkeyup="searchMusic()">
+    <input type="text" id="search" placeholder="Search by composer or name..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
+    <h2>Upload Music</h2>
+    <input type="text" id="title" placeholder="CD Title">
+    <input type="text" id="composer" placeholder="Composer (optional)">
+    <input type="text" id="link" placeholder="Google Drive Link (optional)">
+    <button onclick="uploadMusic()">Upload</button>
+
     <script>
-        const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';  // Your Google Apps Script Web App URL
+        const appUrl = 'YOUR_GOOGLE_APPS_SCRIPT_URL';  // Replace with your Google Apps Script Web App URL
 
-        // Function to toggle the visibility of movements in each CD item
-        function toggleMovements(musicId) {
-            const movementSection = document.getElementById(`movements-${musicId}`);
-            movementSection.style.display = movementSection.style.display === 'none' ? 'block' : 'none';
-        }
-
-        // Function to display music from Google Sheets with collapsible sections for movements
+        // Function to display music from Google Sheets
         function displayMusic() {
             fetch(appUrl)
                 .then(response => response.json())
                 .then(data => {
                     const musicList = document.getElementById("musicList");
-                    musicList.innerHTML = '';
+                    musicList.innerHTML = '';  // Clear previous content
+
                     data.forEach((row, index) => {
                         const item = document.createElement('div');
                         item.classList.add('music-item');
                         item.id = `music-item-${index}`;
 
-                        // Ensure the correct URL is used for each movement
-                        const movementsHTML = row.slice(5).map((movement, i) => {
-                            if (i % 2 === 0 && movement) {
-                                const movementUrl = row[i + 1]; // Correctly grab the URL for this movement
-                                return `<div class="movements"><strong>Movement ${i / 2 + 1}: </strong>${movement}<br>
+                        const movementsHTML = [];
+                        for (let i = 5; i < row.length; i += 2) {
+                            const title = row[i]; // Movement title
+                            const url = row[i + 1]; // Movement URL
+
+                            // Only show the movement if there's a title and URL
+                            if (title && url) {
+                                movementsHTML.push(`
+                                    <div>
+                                        <strong>Movement ${Math.floor(i / 2) + 1}:</strong> ${title}<br>
                                         <audio controls>
-                                            <source src="${movementUrl}" type="audio/mp3">
+                                            <source src="${url}" type="audio/mp3">
                                             Your browser does not support the audio element.
-                                        </audio></div><br>`;
+                                        </audio>
+                                    </div><br>
+                                `);
                             }
-                        }).join('');
+                        }
 
                         item.innerHTML = `
-                            <h3 onclick="toggleMovements(${index})">${row[0]}</h3>
-                            <div id="movements-${index}" style="display: none;">
-                                ${movementsHTML}
+                            <div class="music-info">
+                                <h3 onclick="toggleMovements(${index})" style="cursor: pointer;">${row[0]}</h3>
+                                <div id="movements-${index}" style="display: none;">
+                                    ${movementsHTML.join('')}
+                                </div>
+                                <img src="${row[3]}" alt="Album Art">
+                                <p>Producers: ${row[4]}</p>
+                                <a href="${row[1]}" target="_blank">View Leaflet</a>
                             </div>
-                            <img src="${row[3]}" alt="Album Art" width="150">
-                            <p>Producers: ${row[4]}</p>
-                            <a href="${row[1]}" target="_blank">View Leaflet</a>
                         `;
 
                         musicList.appendChild(item);
@@ -69,14 +79,10 @@
                 });
         }
 
-        // Function to search through music by CD name
-        function searchMusic() {
-            const searchQuery = document.getElementById("search").value.toLowerCase();
-            const items = document.getElementsByClassName('music-item');
-            Array.from(items).forEach(item => {
-                const title = item.getElementsByTagName('h3')[0].textContent.toLowerCase();
-                item.style.display = title.includes(searchQuery) ? '' : 'none';
-            });
+        // Function to toggle the visibility of movements in each CD item
+        function toggleMovements(musicId) {
+            const movementSection = document.getElementById(`movements-${musicId}`);
+            movementSection.style.display = movementSection.style.display === 'none' ? 'block' : 'none';
         }
 
         // Display music when the page loads
