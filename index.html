@@ -40,9 +40,13 @@
             measurementId: "G-CFC1MQPWWB"
         };
 
+
+        
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        // Initialize Firestore
+        const db = firebase.firestore();
 
         let musicData = [];
 
