@@ -13,6 +13,7 @@
             margin: 0;
             padding: 0;
             background-color: #f7f7f7;
+            overflow-x: hidden;
         }
         h1 {
             margin-top: 20px;
@@ -116,12 +117,17 @@
             font-size: 20px;
             color: #666;
         }
+        .spacer {
+            height: 150px; /* Adjust this value to make the gap bigger or smaller */
+        }
     </style>
 </head>
 <body>
     <h1>Welcome to The CDStore 💿</h1>
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
+
+    <div class="spacer"></div> <!-- Large gap at the bottom of the page -->
 
     <div id="player-container">
         <div id="current-song">No song playing</div>
