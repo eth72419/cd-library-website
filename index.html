@@ -177,13 +177,19 @@
         function playAudio(mp3Url, title) {
             const audioSource = document.getElementById("audioSource");
             audioSource.src = mp3Url; // Update the audio source
+            audioPlayer.load(); // Load the new audio
             audioPlayer.style.display = 'block'; // Show the audio controls
-            audioPlayer.play(); // Start playing the song
+            audioPlayer.play() // Start playing the song
+                .catch(error => {
+                    console.error('Error playing audio:', error);
+                    currentSongDisplay.innerText = 'Failed to play song';
+                });
+
             currentSongDisplay.innerText = `Now playing: ${title}`; // Update the song title
 
-            audioPlayer.onplay = function() {
-                seekBar.max = audioPlayer.duration; // Set the max value of the seek bar
-                updateSeekBar();
+            // Update seek bar max value when audio is ready
+            audioPlayer.oncanplaythrough = function() {
+                seekBar.max = audioPlayer.duration;
             };
 
             audioPlayer.ontimeupdate = function() {
