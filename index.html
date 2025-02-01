@@ -39,11 +39,13 @@
                         item.classList.add('music-item');
                         item.id = `music-item-${index}`;
 
+                        // Ensure the URLs are properly added to the audio elements
                         const movementsHTML = row.slice(5).map((movement, i) => {
                             if (i % 2 === 0 && movement) {
+                                const movementUrl = row[i + 1];
                                 return `<div class="movements"><strong>Movement ${i / 2 + 1}: </strong>${movement}<br>
                                         <audio controls>
-                                            <source src="${row[i + 1]}" type="audio/mp3">
+                                            <source src="${movementUrl}" type="audio/mp3">
                                             Your browser does not support the audio element.
                                         </audio></div><br>`;
                             }
