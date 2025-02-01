@@ -1,152 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Music Upload</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    #musicList {
-      margin-top: 20px;
-    }
-    .music-item {
-      margin-bottom: 20px;
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
-    .album-art {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      margin-right: 10px;
-    }
-    audio {
-      width: 100%;
-    }
-    input, button {
-      padding: 10px;
-      margin-bottom: 10px;
-      width: 100%;
-      max-width: 300px;
-    }
-    button {
-      cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Library</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #search { width: 50%; padding: 10px; margin: 10px; }
+        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; }
+        .music-item img { width: 100px; height: 100px; margin-right: 15px; }
+        .music-item div { text-align: left; }
+        .music-item h3 { margin: 0; }
+        .music-item audio { margin-top: 5px; }
+        .movement-list { margin-top: 5px; }
+        .add-movement-button { margin-top: 10px; }
+    </style>
 </head>
 <body>
+    <h1>My Music Library</h1>
+    <input type="text" id="search" placeholder="Search by composer or name..." onkeyup="searchMusic()">
+    <button onclick="document.getElementById('uploadForm').style.display='block'">Admin Upload</button>
 
-  <h1>Upload Music</h1>
+    <div id="musicList"></div>
 
-  <!-- Form to upload music with multiple movements -->
-  <input type="text" id="title" placeholder="Music Title" required>
-  <input type="text" id="composer" placeholder="Composer" required>
-  <input type="text" id="albumArt" placeholder="Album Art URL (Image URL)" required>
+    <div id="uploadForm" style="display:none;">
+        <h2>Upload Music</h2>
+        <input type="text" id="title" placeholder="Music Title">
+        <input type="text" id="composer" placeholder="Composer">
+        <input type="text" id="albumArt" placeholder="Album Art URL">
+        <div id="movements-container">
+            <div class="movement">
+                <input type="text" class="movement-name" placeholder="Movement Name">
+                <input type="text" class="movement-link" placeholder="Google Drive Link">
+            </div>
+        </div>
+        <button class="add-movement-button" onclick="addMovement()">Add Another Movement</button>
+        <button onclick="uploadMusic()">Upload</button>
+    </div>
 
-  <div id="movements">
-    <input type="text" class="movement-name" placeholder="Movement Name (e.g., Movement 1)" required>
-    <input type="text" class="movement-link" placeholder="Google Drive Link" required>
-  </div>
+    <script>
+        let musicData = [];
 
-  <button onclick="addMovement()">Add Another Movement</button>
-  <button onclick="uploadMusic()">Upload</button>
-
-  <!-- Display uploaded music -->
-  <div id="musicList"></div>
-
-  <script>
-    // Function to dynamically add more movements to the form
-    function addMovement() {
-      const movementsContainer = document.getElementById("movements");
-      const newMovement = document.createElement('div');
-      newMovement.innerHTML = `
-        <input type="text" class="movement-name" placeholder="Movement Name" required>
-        <input type="text" class="movement-link" placeholder="Google Drive Link" required>
-      `;
-      movementsContainer.appendChild(newMovement);
-    }
-
-    // Function to upload music data to Google Sheets
-    function uploadMusic() {
-      const title = document.getElementById("title").value;
-      const composer = document.getElementById("composer").value;
-      const albumArt = document.getElementById("albumArt").value;
-      const movements = [];
-
-      // Collect movement names and links
-      const movementNames = document.querySelectorAll(".movement-name");
-      const movementLinks = document.querySelectorAll(".movement-link");
-
-      for (let i = 0; i < movementNames.length; i++) {
-        const movementName = movementNames[i].value;
-        const movementLink = movementLinks[i].value;
-
-        if (movementName && movementLink) {
-          movements.push({
-            name: movementName,
-            link: movementLink
-          });
+        async function loadMusic() {
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec');
+                musicData = await response.json();
+                displayMusic(musicData);
+            } catch (error) {
+                console.error('Error loading music:', error);
+            }
         }
-      }
 
-      const musicData = {
-        title,
-        composer,
-        movements,
-        albumArt
-      };
+        function displayMusic(list) {
+            let musicList = document.getElementById("musicList");
+            musicList.innerHTML = "";
+            list.forEach((track, index) => {
+                let item = document.createElement("div");
+                item.className = "music-item";
 
-      // Post data to Google Apps Script
-      fetch('YOUR_GOOGLE_SCRIPT_URL', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(musicData)
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert("Music uploaded successfully!");
-        loadMusic();  // Reload music list after upload
-      })
-      .catch(error => {
-        console.error('Error uploading music:', error);
-      });
-    }
+                // Create image and music details
+                item.innerHTML = `
+                    <img src="${track.albumArt}" alt="Album Art">
+                    <div>
+                        <h3>${track.title} - ${track.composer}</h3>
+                        <div class="movement-list">
+                            ${track.movements.map(movement => `
+                                <p><strong>${movement.name}</strong><br>
+                                <audio controls>
+                                    <source src="${movement.link}" type="audio/mp3">
+                                    Your browser does not support the audio element.
+                                </audio></p>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                musicList.appendChild(item);
+            });
+        }
 
-    // Function to display music from Google Sheets
-    function displayMusic() {
-      fetch('YOUR_GOOGLE_SCRIPT_URL')
-        .then(response => response.json())
-        .then(data => {
-          const musicList = document.getElementById("musicList");
-          musicList.innerHTML = '';  // Clear the existing list
-          data.forEach(row => {
-            const item = document.createElement('div');
-            item.classList.add('music-item');
-            item.innerHTML = `
-              <h3>${row[0]} - ${row[1]} (${row[2]})</h3>
-              <img src="${row[4]}" alt="Album Art" class="album-art">
-              <audio controls>
-                <source src="${row[3]}" type="audio/mp3">
-                Your browser does not support the audio element.
-              </audio>
+        function searchMusic() {
+            let query = document.getElementById("search").value.toLowerCase();
+            let filtered = musicData.filter(m => 
+                m.title.toLowerCase().includes(query) ||
+                m.composer.toLowerCase().includes(query)
+            );
+            displayMusic(filtered);
+        }
+
+        function addMovement() {
+            const movementContainer = document.getElementById("movements-container");
+            const newMovement = document.createElement("div");
+            newMovement.className = "movement";
+            newMovement.innerHTML = `
+                <input type="text" class="movement-name" placeholder="Movement Name">
+                <input type="text" class="movement-link" placeholder="Google Drive Link">
             `;
-            musicList.appendChild(item);
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching music:', error);
-        });
-    }
+            movementContainer.appendChild(newMovement);
+        }
 
-    // Load music data on page load
-    displayMusic();  // Initial load of music data
-  </script>
+        function uploadMusic() {
+            let title = document.getElementById("title").value;
+            let composer = document.getElementById("composer").value;
+            let albumArt = document.getElementById("albumArt").value;
 
+            let movements = [];
+            let movementElements = document.querySelectorAll(".movement");
+            movementElements.forEach((movement) => {
+                let name = movement.querySelector(".movement-name").value;
+                let link = movement.querySelector(".movement-link").value;
+                if (name && link) {
+                    movements.push({ name, link });
+                }
+            });
+
+            if (title && composer && albumArt && movements.length > 0) {
+                // Here you would send the data to Google Sheets using your backend or a service like Google Apps Script
+                let music = { title, composer, albumArt, movements };
+                musicData.push(music);
+                displayMusic(musicData);
+
+                // Reset form
+                document.getElementById("title").value = "";
+                document.getElementById("composer").value = "";
+                document.getElementById("albumArt").value = "";
+                document.querySelectorAll(".movement").forEach(m => m.remove());
+                document.getElementById("uploadForm").style.display = 'none';
+            }
+        }
+
+        loadMusic();
+    </script>
 </body>
 </html>
