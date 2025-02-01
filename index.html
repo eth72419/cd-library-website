@@ -12,11 +12,21 @@
             padding: 10px; 
             border: 1px solid #ccc; 
             display: flex; 
-            align-items: center; 
-            justify-content: space-between; /* Ensures album art and audio player stay aligned */
+            align-items: center; /* Center album art and player vertically */
+            justify-content: flex-start; /* Align items to the left */
         }
-        .album-art { max-width: 100px; margin-right: 20px; }
-        .music-info { text-align: left; }
+        .album-art { 
+            width: 80px; /* Set a fixed width for album art */
+            height: 80px; /* Set a fixed height for album art */
+            margin-right: 10px; /* Reduced margin between album art and media player */
+        }
+        .music-info { 
+            text-align: left;
+            max-width: 300px; /* Limit width of music info to avoid text overflow */
+        }
+        audio { 
+            width: 100%; /* Make the audio player fill the available space */
+        }
     </style>
 </head>
 <body>
@@ -62,7 +72,6 @@
 
             musicItems.forEach(item => {
                 const title = item.querySelector('h3').textContent.toLowerCase();
-                const albumArt = item.querySelector('.album-art');
                 
                 // Check if the title or composer matches the search query
                 if (title.includes(query)) {
