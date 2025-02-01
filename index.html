@@ -4,92 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The CDStore 💿</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { font-family: Times New Roman, sans-serif; text-align: center; margin: 0; padding: 0; }
-        #search { width: 50%; padding: 10px; margin: 10px auto; }
-        .music-item { 
-            margin: 15px auto; 
-            padding: 15px; 
-            border: 1px solid #ccc; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+        #search {
+            width: 50%;
+            padding: 10px;
+            margin: 20px auto;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .music-item {
+            margin: 15px auto;
+            padding: 15px;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             max-width: 1000px;
+            background-color: white;
+            border-radius: 8px;
         }
-        .album-art { 
-            width: 100px; 
-            height: 100px; 
-            object-fit: cover; 
+        .album-art {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
             margin-right: 10px;
+            border-radius: 8px;
         }
-        .album-art-large { 
-            width: 150px; 
-            height: 150px; 
-            object-fit: cover; 
+        .album-art-large {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
             margin-bottom: 15px;
+            border-radius: 8px;
         }
-        .music-info { 
-            text-align: left;
-            width: 100%;
-            margin-left: 20px;
-        }
-        .disc { 
+        .disc {
             display: flex;
             align-items: center;
-            margin: 10px 0; 
-            cursor: pointer; 
+            margin: 10px 0;
+            cursor: pointer;
             font-weight: bold;
-            padding: 5px;
+            padding: 10px;
             background-color: #f1f1f1;
-            border-radius: 5px;
+            border-radius: 8px;
             width: 100%;
             justify-content: flex-start;
         }
-        .movements { 
+        .disc:hover {
+            background-color: #e0e0e0;
+        }
+        .movements {
             margin-top: 10px;
-            display: none; 
+            display: none;
             margin-bottom: 20px;
             width: 100%;
             text-align: left;
         }
         .movement-item {
-            display: flex; 
+            display: flex;
             align-items: center;
             margin-bottom: 15px;
         }
-        .movement-item audio {
-            margin-left: 15px;
-            width: 80%; 
-        }
-        .movement-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            width: 100%;
+        .movement-item h4 {
+            margin-left: 20px;
         }
         #player-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin-top: 20px;
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #f1f1f1;
+            background-color: #fff;
             width: 100%;
-            padding: 10px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
         }
         #current-song {
             margin-bottom: 10px;
             font-size: 18px;
+            color: #333;
         }
-        .volume-bar {
+        .volume-bar-container {
+            display: flex;
+            align-items: center;
             width: 100%;
             max-width: 400px;
-            margin-top: 10px;
+        }
+        .volume-bar-container input {
+            width: 80%;
+            margin: 0 10px;
+        }
+        .volume-bar-container i {
+            font-size: 20px;
+            color: #666;
         }
     </style>
 </head>
@@ -104,12 +129,14 @@
             <source id="audio-source" src="" type="audio/mp3">
             Your browser does not support the audio element.
         </audio>
-        <input type="range" id="volume-bar" class="volume-bar" value="100" step="1" min="0" max="100">
+        <div class="volume-bar-container">
+            <i class="fas fa-volume-up"></i>
+            <input type="range" id="volume-bar" value="100" step="1" min="0" max="100">
+        </div>
     </div>
 
     <script>
         const jsonUrl = 'https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/BZDRShrz';
-
         let currentAudio = null;
 
         function displayMusic() {
