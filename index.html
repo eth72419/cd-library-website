@@ -63,10 +63,6 @@
             align-items: center;
             margin-bottom: 15px;
         }
-        .movement-item audio {
-            margin-left: 15px;
-            width: 80%; 
-        }
         .movement-info {
             display: flex;
             flex-direction: column;
@@ -155,10 +151,6 @@
                                     <img class="album-art-large" src="${albumArt}" alt="Album Art">
                                     <div class="movement-info">
                                         <h4 style="margin-left: 20px;">${movementTitle}</h4>
-                                        <audio controls>
-                                            <source src="${mp3Url}" type="audio/mp3">
-                                            Your browser does not support the audio element.
-                                        </audio>
                                     </div>
                                 `;
                                 movementItem.addEventListener('click', () => playAudio(mp3Url, movementTitle));
