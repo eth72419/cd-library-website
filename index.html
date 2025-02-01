@@ -7,10 +7,10 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
-        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; }
-        .admin-section { margin-top: 20px; padding: 20px; border-top: 2px solid #ccc; }
-        .form-section { margin: 10px; }
-        #movementsList { margin-top: 10px; }
+        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; display: flex; align-items: center; }
+        .music-item img { margin-right: 20px; }
+        .music-item h3 { cursor: pointer; }
+        .movements { padding-left: 20px; }
     </style>
 </head>
 <body>
@@ -18,131 +18,63 @@
     <input type="text" id="search" placeholder="Search by CD name..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
-    <div class="admin-section">
-        <h2>Admin Upload for Music Library</h2>
-
-        <!-- Admin Upload Form -->
-        <div class="form-section">
-            <label for="cdName">CD Name:</label>
-            <input type="text" id="cdName" placeholder="Enter CD Name"><br><br>
-
-            <label for="albumArt">Album Art URL:</label>
-            <input type="text" id="albumArt" placeholder="Enter Album Art URL"><br><br>
-
-            <label for="producers">Producers:</label>
-            <input type="text" id="producers" placeholder="Enter Producers"><br><br>
-
-            <div id="movementsList"></div>
-
-            <button onclick="addMovement()">Add New Movement</button><br><br>
-
-            <button onclick="uploadMusic()">Upload Music to Google Sheets</button>
-        </div>
-    </div>
-
     <script>
-        const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';  // Google Apps Script URL
-        
-        let movementCount = 0;
+        const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';  // Your Google Apps Script Web App URL
 
-        // Function to dynamically add new movement fields
-        function addMovement() {
-            movementCount++;
-            const movementDiv = document.createElement('div');
-            movementDiv.id = 'movement' + movementCount;
-            movementDiv.innerHTML = `
-                <label for="movementTitle${movementCount}">Movement ${movementCount} Title:</label>
-                <input type="text" id="movementTitle${movementCount}" placeholder="Enter Movement Title">
-                <label for="movementURL${movementCount}">Movement ${movementCount} URL:</label>
-                <input type="text" id="movementURL${movementCount}" placeholder="Enter Movement URL">
-            `;
-            document.getElementById('movementsList').appendChild(movementDiv);
+        // Function to toggle the visibility of movements in each CD item
+        function toggleMovements(musicId) {
+            const movementSection = document.getElementById(`movements-${musicId}`);
+            movementSection.style.display = movementSection.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Function to upload music data to Google Sheets
-        function uploadMusic() {
-            const cdName = document.getElementById("cdName").value;
-            const albumArt = document.getElementById("albumArt").value;
-            const producers = document.getElementById("producers").value;
-
-            if (cdName && albumArt && producers) {
-                const musicData = {
-                    cdName,
-                    albumArt,
-                    producers,
-                };
-
-                // Add movements data
-                for (let i = 1; i <= movementCount; i++) {
-                    const movementTitle = document.getElementById(`movementTitle${i}`).value;
-                    const movementURL = document.getElementById(`movementURL${i}`).value;
-                    musicData[`movement${i}Title`] = movementTitle;
-                    musicData[`movement${i}URL`] = movementURL;
-                }
-
-                // Send data to Google Sheets using POST request
-                fetch(appUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(musicData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Music uploaded successfully!');
-                    resetForm(); // Reset form after successful upload
-                })
-                .catch(error => {
-                    console.error('Error uploading music:', error);
-                    alert('Error uploading music!');
-                });
-            } else {
-                alert('Please fill in all the fields!');
-            }
-        }
-
-        // Reset the form after upload
-        function resetForm() {
-            document.getElementById('cdName').value = '';
-            document.getElementById('albumArt').value = '';
-            document.getElementById('producers').value = '';
-            document.getElementById('movementsList').innerHTML = '';
-            movementCount = 0;
-        }
-
-        // Function to display music from Google Sheets
+        // Function to display music from Google Sheets with collapsible sections for movements
         function displayMusic() {
             fetch(appUrl)
                 .then(response => response.json())
                 .then(data => {
                     const musicList = document.getElementById("musicList");
                     musicList.innerHTML = '';
-                    data.forEach(row => {
+                    data.forEach((row, index) => {
                         const item = document.createElement('div');
                         item.classList.add('music-item');
+                        item.id = `music-item-${index}`;
+
+                        const movementsHTML = row.slice(5).map((movement, i) => {
+                            if (i % 2 === 0 && movement) {
+                                return `<div class="movements"><strong>Movement ${i / 2 + 1}: </strong>${movement}<br>
+                                        <audio controls>
+                                            <source src="${row[i + 1]}" type="audio/mp3">
+                                            Your browser does not support the audio element.
+                                        </audio></div><br>`;
+                            }
+                        }).join('');
+
                         item.innerHTML = `
-                            <h3>${row[0]}</h3>
-                            <img src="${row[3]}" alt="Album Art" width="150" style="margin-right: 20px;">
-                            <p>Producers: ${row[4]}</p>
-                            <div>
-                                ${row.slice(5).map((movement, index) => {
-                                    if (index % 2 === 0) {
-                                        return `<div><strong>Movement ${index / 2 + 1}: </strong>${movement}<br>
-                                            <audio controls>
-                                                <source src="${row[index + 1]}" type="audio/mp3">
-                                                Your browser does not support the audio element.
-                                            </audio></div><br>`;
-                                    }
-                                }).join('')}
+                            <h3 onclick="toggleMovements(${index})">${row[0]}</h3>
+                            <div id="movements-${index}" style="display: none;">
+                                ${movementsHTML}
                             </div>
+                            <img src="${row[3]}" alt="Album Art" width="150">
+                            <p>Producers: ${row[4]}</p>
+                            <a href="${row[1]}" target="_blank">View Leaflet</a>
                         `;
+
                         musicList.appendChild(item);
                     });
                 })
                 .catch(error => {
                     console.error('Error fetching music:', error);
                 });
+        }
+
+        // Function to search through music by CD name
+        function searchMusic() {
+            const searchQuery = document.getElementById("search").value.toLowerCase();
+            const items = document.getElementsByClassName('music-item');
+            Array.from(items).forEach(item => {
+                const title = item.getElementsByTagName('h3')[0].textContent.toLowerCase();
+                item.style.display = title.includes(searchQuery) ? '' : 'none';
+            });
         }
 
         // Display music when the page loads
