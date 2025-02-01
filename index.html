@@ -7,64 +7,109 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
-        .music-item { 
-            margin: 15px; 
-            padding: 15px; 
-            border: 1px solid #ccc; 
-            display: flex; 
-            flex-direction: column; /* Stack items vertically */
-            align-items: center; /* Center content horizontally */
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .album-art { 
-            width: 150px; 
-            height: 150px; 
-            object-fit: cover; 
-            margin-bottom: 15px;
-        }
-        .music-info { 
-            text-align: left;
-            width: 100%;
-        }
-        audio { 
-            width: 80%; 
-            margin-top: 10px; 
-        }
-        .disc { 
-            margin: 10px 0; 
-            cursor: pointer; 
-            font-weight: bold;
-            padding: 5px;
-            background-color: #f1f1f1;
-            border-radius: 5px;
-        }
-        .movements { 
-            margin-top: 10px;
-            display: none; 
-            margin-bottom: 20px;
-            width: 100%;
-            text-align: left;
-        }
-        .movement-item {
-            display: flex; 
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .movement-item audio {
-            margin-left: 15px;
-            width: 80%; /* Audio player width adjusted */
-        }
+        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; }
+        .admin-section { margin-top: 20px; padding: 20px; border-top: 2px solid #ccc; }
+        .form-section { margin: 10px; }
+        #movementsList { margin-top: 10px; }
     </style>
 </head>
 <body>
     <h1>My Music Library</h1>
-    <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
+    <input type="text" id="search" placeholder="Search by CD name..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
+    <div class="admin-section">
+        <h2>Admin Upload for Music Library</h2>
+
+        <!-- Admin Upload Form -->
+        <div class="form-section">
+            <label for="cdName">CD Name:</label>
+            <input type="text" id="cdName" placeholder="Enter CD Name"><br><br>
+
+            <label for="albumArt">Album Art URL:</label>
+            <input type="text" id="albumArt" placeholder="Enter Album Art URL"><br><br>
+
+            <label for="producers">Producers:</label>
+            <input type="text" id="producers" placeholder="Enter Producers"><br><br>
+
+            <div id="movementsList"></div>
+
+            <button onclick="addMovement()">Add New Movement</button><br><br>
+
+            <button onclick="uploadMusic()">Upload Music to Google Sheets</button>
+        </div>
+    </div>
+
     <script>
-        const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';  // Your Google Apps Script Web App URL
+        const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';  // Google Apps Script URL
+        
+        let movementCount = 0;
+
+        // Function to dynamically add new movement fields
+        function addMovement() {
+            movementCount++;
+            const movementDiv = document.createElement('div');
+            movementDiv.id = 'movement' + movementCount;
+            movementDiv.innerHTML = `
+                <label for="movementTitle${movementCount}">Movement ${movementCount} Title:</label>
+                <input type="text" id="movementTitle${movementCount}" placeholder="Enter Movement Title">
+                <label for="movementURL${movementCount}">Movement ${movementCount} URL:</label>
+                <input type="text" id="movementURL${movementCount}" placeholder="Enter Movement URL">
+            `;
+            document.getElementById('movementsList').appendChild(movementDiv);
+        }
+
+        // Function to upload music data to Google Sheets
+        function uploadMusic() {
+            const cdName = document.getElementById("cdName").value;
+            const albumArt = document.getElementById("albumArt").value;
+            const producers = document.getElementById("producers").value;
+
+            if (cdName && albumArt && producers) {
+                const musicData = {
+                    cdName,
+                    albumArt,
+                    producers,
+                };
+
+                // Add movements data
+                for (let i = 1; i <= movementCount; i++) {
+                    const movementTitle = document.getElementById(`movementTitle${i}`).value;
+                    const movementURL = document.getElementById(`movementURL${i}`).value;
+                    musicData[`movement${i}Title`] = movementTitle;
+                    musicData[`movement${i}URL`] = movementURL;
+                }
+
+                // Send data to Google Sheets using POST request
+                fetch(appUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(musicData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Music uploaded successfully!');
+                    resetForm(); // Reset form after successful upload
+                })
+                .catch(error => {
+                    console.error('Error uploading music:', error);
+                    alert('Error uploading music!');
+                });
+            } else {
+                alert('Please fill in all the fields!');
+            }
+        }
+
+        // Reset the form after upload
+        function resetForm() {
+            document.getElementById('cdName').value = '';
+            document.getElementById('albumArt').value = '';
+            document.getElementById('producers').value = '';
+            document.getElementById('movementsList').innerHTML = '';
+            movementCount = 0;
+        }
 
         // Function to display music from Google Sheets
         function displayMusic() {
@@ -72,77 +117,32 @@
                 .then(response => response.json())
                 .then(data => {
                     const musicList = document.getElementById("musicList");
-                    musicList.innerHTML = ''; // Clear previous music list
+                    musicList.innerHTML = '';
                     data.forEach(row => {
                         const item = document.createElement('div');
                         item.classList.add('music-item');
-
-                        const discName = row[4]; // Get CD Disc
-                        const albumArt = row[3]; // Get album art URL
-                        const link = row[2]; // Get general link (Google Drive link for the entire album)
-                        
-                        // Create collapsible disc section
-                        const discSection = document.createElement('div');
-                        discSection.classList.add('disc');
-                        discSection.innerHTML = `${row[0]} - ${discName}`;
-
-                        // Create a container for movements
-                        const movementsContainer = document.createElement('div');
-                        movementsContainer.classList.add('movements');
-                        
-                        // Loop through movements (Track Title and Track URL)
-                        let trackCount = 5; // Start from 5th column, as CD Title is in column 0
-                        let movementIndex = 1;
-                        while (trackCount < row.length) {
-                            const trackTitle = row[trackCount];
-                            const trackUrl = row[trackCount + 1];
-                            if (trackTitle && trackUrl) {
-                                const movementItem = document.createElement('div');
-                                movementItem.classList.add('movement-item');
-                                movementItem.innerHTML = `
-                                    <img class="album-art" src="${albumArt}" alt="Album Art">
-                                    <div class="music-info">
-                                        <h4>${trackTitle}</h4>
-                                        <audio controls>
-                                            <source src="${trackUrl}" type="audio/mp3">
-                                            Your browser does not support the audio element.
-                                        </audio>
-                                    </div>
-                                `;
-                                movementsContainer.appendChild(movementItem);
-                            }
-                            trackCount += 2; // Move to next track (skip two columns, one for title, one for URL)
-                            movementIndex++;
-                        }
-
-                        // Append the collapsible section with movements
-                        discSection.addEventListener('click', () => {
-                            const isVisible = movementsContainer.style.display === 'block';
-                            movementsContainer.style.display = isVisible ? 'none' : 'block';
-                        });
-
-                        item.appendChild(discSection);
-                        item.appendChild(movementsContainer);
+                        item.innerHTML = `
+                            <h3>${row[0]}</h3>
+                            <img src="${row[3]}" alt="Album Art" width="150" style="margin-right: 20px;">
+                            <p>Producers: ${row[4]}</p>
+                            <div>
+                                ${row.slice(5).map((movement, index) => {
+                                    if (index % 2 === 0) {
+                                        return `<div><strong>Movement ${index / 2 + 1}: </strong>${movement}<br>
+                                            <audio controls>
+                                                <source src="${row[index + 1]}" type="audio/mp3">
+                                                Your browser does not support the audio element.
+                                            </audio></div><br>`;
+                                    }
+                                }).join('')}
+                            </div>
+                        `;
                         musicList.appendChild(item);
                     });
                 })
                 .catch(error => {
                     console.error('Error fetching music:', error);
                 });
-        }
-
-        // Function to search music based on input
-        function searchMusic() {
-            const query = document.getElementById("search").value.toLowerCase();
-            const musicItems = document.querySelectorAll('.music-item');
-            musicItems.forEach(item => {
-                const title = item.querySelector('.disc').innerText.toLowerCase();
-                if (title.includes(query)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
         }
 
         // Display music when the page loads
