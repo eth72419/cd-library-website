@@ -22,12 +22,11 @@
         <input type="text" id="title" placeholder="Music Title">
         <input type="text" id="composer" placeholder="Composer">
         <input type="text" id="musicURL" placeholder="Music URL (e.g., a link to an mp3)">
-        <button onclick="uploadMusic()">Upload</button>
+        <button id="uploadButton">Upload</button>
     </div>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <script>
@@ -100,16 +99,23 @@
             }
 
             // Save metadata to Firestore
-            await db.collection('music').add({
-                title: title,
-                composer: composer,
-                link: musicURL
-            });
-
-            alert("Upload successful!");
-            document.getElementById("uploadForm").style.display = 'none';
-            loadMusic();
+            try {
+                await db.collection('music').add({
+                    title: title,
+                    composer: composer,
+                    link: musicURL
+                });
+                alert("Upload successful!");
+                document.getElementById("uploadForm").style.display = 'none';
+                loadMusic();
+            } catch (error) {
+                console.error("Error uploading music: ", error);
+                alert("Failed to upload music.");
+            }
         }
+
+        // Add event listener for upload button
+        document.getElementById('uploadButton').addEventListener('click', uploadMusic);
 
         // Load music when the page loads
         loadMusic();
