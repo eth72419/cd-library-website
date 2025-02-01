@@ -73,6 +73,49 @@
             justify-content: center;
             width: 100%;
         }
+
+        /* Mobile specific styles */
+        @media (max-width: 768px) {
+            #search {
+                width: 80%; /* Wider search bar for mobile */
+            }
+
+            .music-item {
+                width: 90%; /* Make music items take up most of the screen width */
+                padding: 10px;
+                margin: 10px auto;
+            }
+
+            .album-art {
+                width: 80px; /* Smaller album art for mobile */
+                height: 80px;
+            }
+
+            .album-art-large {
+                width: 120px; /* Adjust size of large album art */
+                height: 120px;
+            }
+
+            .disc {
+                font-size: 16px; /* Adjust text size for smaller screens */
+                flex-direction: column;
+                text-align: center; /* Center-align the disc name and art */
+            }
+
+            .music-info {
+                margin-left: 0; /* Remove left margin for mobile */
+                margin-top: 10px;
+            }
+
+            .movement-item {
+                flex-direction: column; /* Stack movements vertically */
+                text-align: center; /* Center align the movement title */
+            }
+
+            .movement-item audio {
+                width: 100%; /* Make audio player take full width */
+            }
+        }
     </style>
 </head>
 <body>
