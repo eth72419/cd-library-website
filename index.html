@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Library</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/audiojs/dist/audiojs.css"> <!-- Audio.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/audiojs/dist/audiojs.css"> <!-- Include Audio.js CSS -->
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
@@ -13,8 +13,8 @@
             padding: 15px; 
             border: 1px solid #ccc; 
             display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center content horizontally */
             max-width: 1000px;
             margin-left: auto;
             margin-right: auto;
@@ -60,28 +60,26 @@
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
-    <!-- Include Audio.js -->
-    <script src="https://cdn.jsdelivr.net/npm/audiojs/dist/audiojs.min.js"></script>
-
+    <!-- Include Audio.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/audiojs/dist/audio.min.js"></script>
     <script>
-        // URL to your hosted txt file (GitHub raw link)
-        const jsonUrl = 'https://raw.githubusercontent.com/eth72419/cd-library-website/refs/heads/main/database.txt?token=GHSAT0AAAAAAC6HNIE77RPWONYKBILEB2W2Z46MDCA';
+        // URL to your hosted JSON TXT file
+        const jsonUrl = 'https://example.com/path/to/your/cd_data.txt';  // Replace with the actual URL of your hosted JSON file
 
         // Function to display music from the hosted JSON file
         function displayMusic() {
             fetch(jsonUrl)
-                .then(response => response.text())  // Get raw text from the file
+                .then(response => response.json())  // Parse the JSON data from the file
                 .then(data => {
-                    const musicData = JSON.parse(data);  // Parse the text as JSON
                     const musicList = document.getElementById("musicList");
                     musicList.innerHTML = ''; // Clear previous music list
-                    
-                    musicData.forEach(row => {
+                    data.forEach(row => {
                         const item = document.createElement('div');
                         item.classList.add('music-item');
 
                         const discName = row.cd_title;  // Get CD Title
                         const albumArt = row.album_art_url;  // Get album art URL
+                        const link = row.link;  // Get general link (Google Drive link for the entire album)
 
                         // Create collapsible disc section
                         const discSection = document.createElement('div');
@@ -104,10 +102,12 @@
                                     <img class="album-art" src="${albumArt}" alt="Album Art">
                                     <div class="music-info">
                                         <h4>${movementTitle}</h4>
-                                        <audio class="audiojs" controls>
-                                            <source src="${mp3Url}" type="audio/mp3">
-                                            Your browser does not support the audio element.
-                                        </audio>
+                                        <div class="audiojs-player">
+                                            <audio class="audiojs" preload="none">
+                                                <source src="${mp3Url}" type="audio/mp3">
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        </div>
                                     </div>
                                 `;
                                 movementsContainer.appendChild(movementItem);
@@ -125,9 +125,13 @@
                         musicList.appendChild(item);
                     });
 
-                    // Initialize Audio.js players after rendering the music items
-                    const players = document.querySelectorAll('.audiojs');
-                    audiojs(players);
+                    // Initialize Audio.js for all audio elements after loading content
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const players = document.querySelectorAll('.audiojs');
+                        players.forEach((player) => {
+                            audiojs.create(player);  // Initialize each audio player
+                        });
+                    });
                 })
                 .catch(error => {
                     console.error('Error fetching music:', error);
