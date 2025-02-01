@@ -5,18 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The CDStore 💿</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #search { width: 50%; padding: 10px; margin: 10px; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: space-between; height: 100vh; }
+        #search { width: 50%; padding: 10px; margin: 10px auto; }
         .music-item { 
-            margin: 15px; 
+            margin: 15px auto; 
             padding: 15px; 
             border: 1px solid #ccc; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
         }
         .album-art { 
             width: 100px; 
@@ -63,29 +61,31 @@
             align-items: center;
             margin-bottom: 15px;
         }
+        .movement-item audio {
+            margin-left: 15px;
+            width: 80%; 
+        }
         .movement-info {
             display: flex;
             flex-direction: column;
             justify-content: center;
             width: 100%;
         }
-        /* Bottom Player Controls */
-        #playerControls {
+        #player-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             margin-top: 20px;
-            background-color: #f1f1f1;
-            padding: 10px;
+        }
+        #current-song {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .seek-bar {
             width: 100%;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            text-align: center;
-        }
-        #currentSong {
-            font-weight: bold;
-        }
-        #seekBar {
-            width: 80%;
-            margin: 10px 0;
+            max-width: 400px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -94,33 +94,31 @@
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
 
-    <!-- Player Controls at the Bottom -->
-    <div id="playerControls">
-        <div id="currentSong">No song playing</div>
-        <audio id="audioPlayer" controls style="width: 80%; display: none;">
-            <source id="audioSource" type="audio/mp3">
+    <div id="player-container">
+        <div id="current-song">No song playing</div>
+        <audio id="audio-player" controls style="width: 80%; max-width: 400px;">
+            <source id="audio-source" src="" type="audio/mp3">
             Your browser does not support the audio element.
         </audio>
-        <input type="range" id="seekBar" value="0" max="100" step="1" onchange="seekAudio()">
+        <input type="range" id="seek-bar" class="seek-bar" value="0" step="1" min="0" max="100">
     </div>
 
     <script>
-        const jsonUrl = 'https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/BZDRShrz';  // CORS proxy added
-        let audioPlayer = document.getElementById("audioPlayer");
-        let currentSongDisplay = document.getElementById("currentSong");
-        let seekBar = document.getElementById("seekBar");
+        const jsonUrl = 'https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/BZDRShrz';
+
+        let currentAudio = null;
 
         function displayMusic() {
             fetch(jsonUrl, {
                 method: 'GET',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',  // Add required header
+                    'X-Requested-With': 'XMLHttpRequest',  
                 }
             })
             .then(response => response.json())
             .then(data => {
                 const musicList = document.getElementById("musicList");
-                musicList.innerHTML = '';  // Clear the existing music list
+                musicList.innerHTML = '';
 
                 if (data && Array.isArray(data)) {
                     data.forEach(row => {
@@ -132,7 +130,7 @@
 
                         const discSection = document.createElement('div');
                         discSection.classList.add('disc');
-                        discSection.innerHTML = ` 
+                        discSection.innerHTML = `
                             <img class="album-art" src="${albumArt}" alt="Album Art">
                             ${discName}
                         `;
@@ -147,14 +145,24 @@
                             mp3Urls.forEach(mp3Url => {
                                 const movementItem = document.createElement('div');
                                 movementItem.classList.add('movement-item');
-                                movementItem.innerHTML = ` 
+                                movementItem.innerHTML = `
                                     <img class="album-art-large" src="${albumArt}" alt="Album Art">
                                     <div class="movement-info">
                                         <h4 style="margin-left: 20px;">${movementTitle}</h4>
+                                        <audio class="movement-audio" controls>
+                                            <source src="${mp3Url}" type="audio/mp3">
+                                            Your browser does not support the audio element.
+                                        </audio>
                                     </div>
                                 `;
-                                movementItem.addEventListener('click', () => playAudio(mp3Url, movementTitle));
                                 movementsContainer.appendChild(movementItem);
+
+                                // Add event listener to the audio player for each movement
+                                const movementAudio = movementItem.querySelector('.movement-audio');
+                                movementAudio.addEventListener('play', () => {
+                                    updateCurrentSong(movementTitle, mp3Url);
+                                    setupSeekBar(movementAudio);
+                                });
                             });
                         });
 
@@ -174,35 +182,29 @@
             });
         }
 
-        function playAudio(mp3Url, title) {
-            const audioSource = document.getElementById("audioSource");
-            audioSource.src = mp3Url; // Update the audio source
-            audioPlayer.load(); // Load the new audio
-            audioPlayer.style.display = 'block'; // Show the audio controls
-            audioPlayer.play() // Start playing the song
-                .catch(error => {
-                    console.error('Error playing audio:', error);
-                    currentSongDisplay.innerText = 'Failed to play song';
-                });
+        function updateCurrentSong(title, src) {
+            const currentSongText = document.getElementById('current-song');
+            const audioPlayer = document.getElementById('audio-player');
+            const audioSource = document.getElementById('audio-source');
 
-            currentSongDisplay.innerText = `Now playing: ${title}`; // Update the song title
-
-            // Update seek bar max value when audio is ready
-            audioPlayer.oncanplaythrough = function() {
-                seekBar.max = audioPlayer.duration;
-            };
-
-            audioPlayer.ontimeupdate = function() {
-                updateSeekBar();
-            };
+            currentSongText.textContent = `Now Playing: ${title}`;
+            audioSource.src = src;
+            audioPlayer.load();
+            audioPlayer.play();
         }
 
-        function updateSeekBar() {
-            seekBar.value = audioPlayer.currentTime;
-        }
+        function setupSeekBar(audio) {
+            const seekBar = document.getElementById('seek-bar');
 
-        function seekAudio() {
-            audioPlayer.currentTime = seekBar.value;
+            audio.addEventListener('timeupdate', () => {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                seekBar.value = progress;
+            });
+
+            seekBar.addEventListener('input', () => {
+                const newTime = (seekBar.value / 100) * audio.duration;
+                audio.currentTime = newTime;
+            });
         }
 
         function searchMusic() {
