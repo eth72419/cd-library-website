@@ -6,7 +6,7 @@
     <title>Music Library</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/audiojs/dist/audiojs.css"> <!-- Include Audio.js CSS -->
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
+        body { font-family: Calibri, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
         .music-item { 
             margin: 15px; 
@@ -64,7 +64,7 @@
     <script src="https://cdn.jsdelivr.net/npm/audiojs/dist/audio.min.js"></script>
     <script>
         // URL to your hosted JSON TXT file
-        const jsonUrl = 'https://raw.githubusercontent.com/eth72419/cd-library-website/refs/heads/main/database.txt?token=GHSAT0AAAAAAC6HNIE6ZVO7PTZVSO4F254SZ46MHZA';  // Replace with the actual URL of your hosted JSON file
+        const jsonUrl = 'https://example.com/path/to/your/cd_data.txt';  // Replace with the actual URL of your hosted JSON file
 
         // Function to display music from the hosted JSON file
         function displayMusic() {
@@ -126,10 +126,10 @@
                     });
 
                     // Initialize Audio.js for all audio elements after loading content
-                    document.addEventListener('DOMContentLoaded', function() {
+                    audiojs.events.ready(function() {
                         const players = document.querySelectorAll('.audiojs');
                         players.forEach((player) => {
-                            audiojs.create(player);  // Initialize each audio player
+                            audiojs.create(player);
                         });
                     });
                 })
