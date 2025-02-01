@@ -74,46 +74,31 @@
             width: 100%;
         }
 
-        /* Mobile specific styles */
+        /* Mobile Specific Styling */
         @media (max-width: 768px) {
+            body {
+                font-size: 14px; /* Smaller font for mobile */
+            }
             #search {
-                width: 80%; /* Wider search bar for mobile */
+                width: 80%; /* Make search bar larger on mobile */
             }
-
             .music-item {
-                width: 90%; /* Make music items take up most of the screen width */
-                padding: 10px;
-                margin: 10px auto;
+                width: 90%; /* Smaller width for music items */
+                margin: 10px 0; /* Reduced margin */
             }
-
             .album-art {
                 width: 80px; /* Smaller album art for mobile */
                 height: 80px;
             }
-
             .album-art-large {
-                width: 120px; /* Adjust size of large album art */
+                width: 120px;
                 height: 120px;
             }
-
             .disc {
-                font-size: 16px; /* Adjust text size for smaller screens */
-                flex-direction: column;
-                text-align: center; /* Center-align the disc name and art */
+                padding: 10px; /* Adjust padding for mobile */
             }
-
-            .music-info {
-                margin-left: 0; /* Remove left margin for mobile */
-                margin-top: 10px;
-            }
-
             .movement-item {
-                flex-direction: column; /* Stack movements vertically */
-                text-align: center; /* Center align the movement title */
-            }
-
-            .movement-item audio {
-                width: 100%; /* Make audio player take full width */
+                flex-direction: column; /* Stack the movement title and audio vertically on mobile */
             }
         }
     </style>
@@ -131,57 +116,63 @@
                 .then(response => response.json())
                 .then(data => {
                     const musicList = document.getElementById("musicList");
-                    musicList.innerHTML = '';
-                    data.forEach(row => {
-                        const item = document.createElement('div');
-                        item.classList.add('music-item');
+                    musicList.innerHTML = '';  // Clear the existing music list
 
-                        const discName = row.cd_title;
-                        const albumArt = row.album_art_url;
+                    if (data && Array.isArray(data)) {
+                        data.forEach(row => {
+                            const item = document.createElement('div');
+                            item.classList.add('music-item');
 
-                        const discSection = document.createElement('div');
-                        discSection.classList.add('disc');
-                        discSection.innerHTML = `
-                            <img class="album-art" src="${albumArt}" alt="Album Art">
-                            ${discName}
-                        `;
+                            const discName = row.cd_title;
+                            const albumArt = row.album_art_url;
 
-                        const movementsContainer = document.createElement('div');
-                        movementsContainer.classList.add('movements');
+                            const discSection = document.createElement('div');
+                            discSection.classList.add('disc');
+                            discSection.innerHTML = `
+                                <img class="album-art" src="${albumArt}" alt="Album Art">
+                                ${discName}
+                            `;
 
-                        row.movements.forEach(movement => {
-                            const movementTitle = movement.movement_title;
-                            const mp3Urls = movement.mp3_urls;
+                            const movementsContainer = document.createElement('div');
+                            movementsContainer.classList.add('movements');
 
-                            mp3Urls.forEach(mp3Url => {
-                                const movementItem = document.createElement('div');
-                                movementItem.classList.add('movement-item');
-                                movementItem.innerHTML = `
-                                    <img class="album-art-large" src="${albumArt}" alt="Album Art">
-                                    <div class="movement-info">
-                                        <h4 style="margin-left: 20px;">${movementTitle}</h4>
-                                        <audio controls>
-                                            <source src="${mp3Url}" type="audio/mp3">
-                                            Your browser does not support the audio element.
-                                        </audio>
-                                    </div>
-                                `;
-                                movementsContainer.appendChild(movementItem);
+                            row.movements.forEach(movement => {
+                                const movementTitle = movement.movement_title;
+                                const mp3Urls = movement.mp3_urls;
+
+                                mp3Urls.forEach(mp3Url => {
+                                    const movementItem = document.createElement('div');
+                                    movementItem.classList.add('movement-item');
+                                    movementItem.innerHTML = `
+                                        <img class="album-art-large" src="${albumArt}" alt="Album Art">
+                                        <div class="movement-info">
+                                            <h4 style="margin-left: 20px;">${movementTitle}</h4>
+                                            <audio controls>
+                                                <source src="${mp3Url}" type="audio/mp3">
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        </div>
+                                    `;
+                                    movementsContainer.appendChild(movementItem);
+                                });
                             });
-                        });
 
-                        discSection.addEventListener('click', () => {
-                            const isVisible = movementsContainer.style.display === 'block';
-                            movementsContainer.style.display = isVisible ? 'none' : 'block';
-                        });
+                            discSection.addEventListener('click', () => {
+                                const isVisible = movementsContainer.style.display === 'block';
+                                movementsContainer.style.display = isVisible ? 'none' : 'block';
+                            });
 
-                        item.appendChild(discSection);
-                        item.appendChild(movementsContainer);
-                        musicList.appendChild(item);
-                    });
+                            item.appendChild(discSection);
+                            item.appendChild(movementsContainer);
+                            musicList.appendChild(item);
+                        });
+                    } else {
+                        musicList.innerHTML = 'No music found.';
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching music:', error);
+                    document.getElementById("musicList").innerHTML = 'Error loading music.';
                 });
         }
 
