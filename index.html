@@ -133,7 +133,7 @@
             cursor: pointer;
             text-decoration: none;
             margin-top: 30px;
-            display: none; /* Hidden initially */
+            display: block; /* Ensure it's visible */
         }
 
         .full-collection-button:hover {
@@ -254,7 +254,7 @@
 
                 // Now that music is loaded, show the "Full Collection" button
                 const fullCollectionBtn = document.getElementById("full-collection-btn");
-                fullCollectionBtn.style.display = 'inline-block'; // Show the button
+                fullCollectionBtn.style.display = 'block'; // Show the button
             })
             .catch(error => {
                 console.error('Error fetching music:', error);
@@ -282,4 +282,7 @@
             });
         }
 
-        function search
+        displayMusic();
+    </script>
+</body>
+</html>
