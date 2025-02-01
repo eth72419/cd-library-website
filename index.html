@@ -21,74 +21,110 @@
         <h2>Upload Music</h2>
         <input type="text" id="title" placeholder="Music Title">
         <input type="text" id="composer" placeholder="Composer">
-        <input type="text" id="driveLink" placeholder="MP3 or Google Drive Link">
-        <button onclick="addMusic()">Upload</button>
+        <input type="file" id="fileInput">
+        <button onclick="uploadMusic()">Upload</button>
     </div>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
     <script>
-        let musicData = [];
-        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB963aqBv0lfDH9VNmkvapgledMd7RLxlg",
+            authDomain: "cd-database-7bdc9.firebaseapp.com",
+            projectId: "cd-database-7bdc9",
+            storageBucket: "cd-database-7bdc9.firebasestorage.app",
+            messagingSenderId: "320264179600",
+            appId: "1:320264179600:web:dfc12d8fce5aac2a526d15",
+            measurementId: "G-CFC1MQPWWB"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Load music from Firestore
         async function loadMusic() {
-            try {
-                const response = await fetch('music.json'); // Load JSON data
-                musicData = await response.json();
-                displayMusic(musicData);
-            } catch (error) {
-                console.error('Error loading music:', error);
-            }
+            const snapshot = await db.collection('music').get();
+            let musicList = [];
+            snapshot.forEach(doc => {
+                musicList.push(doc.data());
+            });
+            displayMusic(musicList);
         }
 
-        function displayMusic(list) {
-            let musicList = document.getElementById("musicList");
-            musicList.innerHTML = "";
-            list.forEach((track, index) => {
+        // Display music list
+        function displayMusic(musicList) {
+            let musicListContainer = document.getElementById("musicList");
+            musicListContainer.innerHTML = '';
+            musicList.forEach(track => {
                 let item = document.createElement("div");
                 item.className = "music-item";
                 item.innerHTML = `
                     <h3>${track.title} - ${track.composer}</h3>
                     <audio controls>
-                        <source src="${getAudioSource(track.link)}" type="audio/mp3">
+                        <source src="${track.link}" type="audio/mp3">
                         Your browser does not support the audio element.
                     </audio>
                 `;
-                musicList.appendChild(item);
+                musicListContainer.appendChild(item);
             });
         }
-        
-        function searchMusic() {
+
+        // Search music
+        async function searchMusic() {
             let query = document.getElementById("search").value.toLowerCase();
-            let filtered = musicData.filter(m => 
-                m.title.toLowerCase().includes(query) ||
-                m.composer.toLowerCase().includes(query)
-            );
-            displayMusic(filtered);
+            const snapshot = await db.collection('music').get();
+            let musicList = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.title.toLowerCase().includes(query) || data.composer.toLowerCase().includes(query)) {
+                    musicList.push(data);
+                }
+            });
+            displayMusic(musicList);
         }
-        
-        function addMusic() {
-            let title = document.getElementById("title").value;
-            let composer = document.getElementById("composer").value;
-            let link = document.getElementById("driveLink").value;
-            if (title && composer && link) {
-                musicData.push({ title, composer, link });
-                displayMusic(musicData);
-                document.getElementById("uploadForm").style.display = 'none';
+
+        // Upload music to Firebase
+        async function uploadMusic() {
+            const title = document.getElementById('title').value;
+            const composer = document.getElementById('composer').value;
+            const file = document.getElementById('fileInput').files[0];
+
+            if (!title || !composer || !file) {
+                alert("Please fill in all fields.");
+                return;
             }
-        }
-        
-        // Determines if it's a Google Drive link or a direct MP3 URL
-        function getAudioSource(url) {
-            if (url.includes('drive.google.com')) {
-                return `https://drive.google.com/uc?export=download&id=${extractDriveID(url)}`;
-            } else {
-                return url; // For non-Google Drive links, just use the URL as it is
+
+            // Create a storage reference
+            const storageRef = storage.ref('music/' + file.name);
+            
+            try {
+                // Upload the file to Firebase Storage
+                const uploadTask = await storageRef.put(file);
+                const fileURL = await storageRef.getDownloadURL();
+                
+                // Save metadata to Firestore
+                await db.collection('music').add({
+                    title: title,
+                    composer: composer,
+                    link: fileURL
+                });
+
+                alert("Upload successful!");
+                document.getElementById("uploadForm").style.display = 'none';
+                loadMusic();
+            } catch (error) {
+                console.error("Error uploading file: ", error);
+                alert("Upload failed. Please try again.");
             }
         }
 
-        function extractDriveID(url) {
-            let match = url.match(/[-\w]{25,}/);
-            return match ? match[0] : "";
-        }
-        
+        // Load music when the page loads
         loadMusic();
     </script>
 </body>
