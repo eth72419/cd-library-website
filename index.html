@@ -21,7 +21,7 @@
         <h2>Upload Music</h2>
         <input type="text" id="title" placeholder="Music Title">
         <input type="text" id="composer" placeholder="Composer">
-        <input type="file" id="fileInput">
+        <input type="text" id="musicURL" placeholder="Music URL (e.g., a link to an mp3)">
         <button onclick="uploadMusic()">Upload</button>
     </div>
     
@@ -45,7 +45,6 @@
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         // Load music from Firestore
         async function loadMusic() {
@@ -89,39 +88,27 @@
             displayMusic(musicList);
         }
 
-        // Upload music to Firebase
+        // Upload music to Firestore
         async function uploadMusic() {
             const title = document.getElementById('title').value;
             const composer = document.getElementById('composer').value;
-            const file = document.getElementById('fileInput').files[0];
+            const musicURL = document.getElementById('musicURL').value;
 
-            if (!title || !composer || !file) {
+            if (!title || !composer || !musicURL) {
                 alert("Please fill in all fields.");
                 return;
             }
 
-            // Create a storage reference
-            const storageRef = storage.ref('music/' + file.name);
-            
-            try {
-                // Upload the file to Firebase Storage
-                const uploadTask = await storageRef.put(file);
-                const fileURL = await storageRef.getDownloadURL();
-                
-                // Save metadata to Firestore
-                await db.collection('music').add({
-                    title: title,
-                    composer: composer,
-                    link: fileURL
-                });
+            // Save metadata to Firestore
+            await db.collection('music').add({
+                title: title,
+                composer: composer,
+                link: musicURL
+            });
 
-                alert("Upload successful!");
-                document.getElementById("uploadForm").style.display = 'none';
-                loadMusic();
-            } catch (error) {
-                console.error("Error uploading file: ", error);
-                alert("Upload failed. Please try again.");
-            }
+            alert("Upload successful!");
+            document.getElementById("uploadForm").style.display = 'none';
+            loadMusic();
         }
 
         // Load music when the page loads
