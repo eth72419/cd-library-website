@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Library</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #search { width: 50%; padding: 10px; margin: 10px; }
+        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>My Music Library</h1>
+    <input type="text" id="search" placeholder="Search by composer or name..." onkeyup="searchMusic()">
+    <button onclick="document.getElementById('uploadForm').style.display='block'">Admin Upload</button>
+    
+    <div id="musicList"></div>
+    
+    <div id="uploadForm" style="display:none;">
+        <h2>Upload Music</h2>
+        <input type="text" id="title" placeholder="Music Title">
+        <input type="text" id="composer" placeholder="Composer">
+        <input type="text" id="driveLink" placeholder="MP3 or Google Drive Link">
+        <button onclick="addMusic()">Upload</button>
+    </div>
+    
+    <script>
+        let musicData = [];
+        
+        async function loadMusic() {
+            try {
+                const response = await fetch('music.json'); // Load JSON data
+                musicData = await response.json();
+                displayMusic(musicData);
+            } catch (error) {
+                console.error('Error loading music:', error);
+            }
+        }
+
+        function displayMusic(list) {
+            let musicList = document.getElementById("musicList");
+            musicList.innerHTML = "";
+            list.forEach((track, index) => {
+                let item = document.createElement("div");
+                item.className = "music-item";
+                item.innerHTML = `
+                    <h3>${track.title} - ${track.composer}</h3>
+                    <audio controls>
+                        <source src="${getAudioSource(track.link)}" type="audio/mp3">
+                        Your browser does not support the audio element.
+                    </audio>
+                `;
+                musicList.appendChild(item);
+            });
+        }
+        
+        function searchMusic() {
+            let query = document.getElementById("search").value.toLowerCase();
+            let filtered = musicData.filter(m => 
+                m.title.toLowerCase().includes(query) ||
+                m.composer.toLowerCase().includes(query)
+            );
+            displayMusic(filtered);
+        }
+        
+        function addMusic() {
+            let title = document.getElementById("title").value;
+            let composer = document.getElementById("composer").value;
+            let link = document.getElementById("driveLink").value;
+            if (title && composer && link) {
+                musicData.push({ title, composer, link });
+                displayMusic(musicData);
+                document.getElementById("uploadForm").style.display = 'none';
+            }
+        }
+        
+        // Determines if it's a Google Drive link or a direct MP3 URL
+        function getAudioSource(url) {
+            if (url.includes('drive.google.com')) {
+                return `https://drive.google.com/uc?export=download&id=${extractDriveID(url)}`;
+            } else {
+                return url; // For non-Google Drive links, just use the URL as it is
+            }
+        }
+
+        function extractDriveID(url) {
+            let match = url.match(/[-\w]{25,}/);
+            return match ? match[0] : "";
+        }
+        
+        loadMusic();
+    </script>
+</body>
+</html>
