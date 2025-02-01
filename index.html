@@ -13,103 +13,74 @@
 <body>
     <h1>My Music Library</h1>
     <input type="text" id="search" placeholder="Search by composer or name..." onkeyup="searchMusic()">
-    <button onclick="document.getElementById('uploadForm').style.display='block'">Admin Upload</button>
-    
     <div id="musicList"></div>
-    
-    <div id="uploadForm" style="display:none;">
-        <h2>Upload Music</h2>
-        <input type="text" id="title" placeholder="Music Title">
-        <input type="text" id="composer" placeholder="Composer">
-        <input type="text" id="url" placeholder="Music URL (e.g. https://example.com/music.mp3)">
-        <button onclick="uploadMusic()">Upload</button>
-    </div>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+
+    <h2>Upload Music</h2>
+    <input type="text" id="title" placeholder="Music Title">
+    <input type="text" id="composer" placeholder="Composer">
+    <input type="text" id="link" placeholder="Google Drive Link">
+    <button onclick="uploadMusic()">Upload</button>
 
     <script>
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB963aqBv0lfDH9VNmkvapgledMd7RLxlg",
-            authDomain: "cd-database-7bdc9.firebaseapp.com",
-            projectId: "cd-database-7bdc9",
-            storageBucket: "cd-database-7bdc9.firebasestorage.app",
-            messagingSenderId: "320264179600",
-            appId: "1:320264179600:web:dfc12d8fce5aac2a526d15",
-            measurementId: "G-CFC1MQPWWB"
-        };
-
-
+        const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';  // Your Google Apps Script Web App URL
         
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        // Initialize Firestore
-        const db = firebase.firestore();
+        // Function to upload music data to Google Sheets
+        function uploadMusic() {
+            const title = document.getElementById("title").value;
+            const composer = document.getElementById("composer").value;
+            const link = document.getElementById("link").value;
 
-        let musicData = [];
+            if (title && composer && link) {
+                const musicData = { title, composer, link };
 
-        async function loadMusic() {
-            try {
-                const querySnapshot = await db.collection("music").get();
-                musicData = querySnapshot.docs.map(doc => doc.data());
-                displayMusic(musicData);
-            } catch (error) {
-                console.error('Error loading music:', error);
-            }
-        }
-
-        function displayMusic(list) {
-            let musicList = document.getElementById("musicList");
-            musicList.innerHTML = "";
-            list.forEach((track) => {
-                let item = document.createElement("div");
-                item.className = "music-item";
-                item.innerHTML = `
-                    <h3>${track.title} - ${track.composer}</h3>
-                    <audio controls>
-                        <source src="${track.url}" type="audio/mp3">
-                        Your browser does not support the audio element.
-                    </audio>
-                `;
-                musicList.appendChild(item);
-            });
-        }
-
-        function searchMusic() {
-            let query = document.getElementById("search").value.toLowerCase();
-            let filtered = musicData.filter(m => 
-                m.title.toLowerCase().includes(query) ||
-                m.composer.toLowerCase().includes(query)
-            );
-            displayMusic(filtered);
-        }
-
-        async function uploadMusic() {
-            let title = document.getElementById("title").value;
-            let composer = document.getElementById("composer").value;
-            let url = document.getElementById("url").value;
-            if (title && composer && url) {
-                try {
-                    // Add music data to Firestore
-                    await db.collection("music").add({
-                        title: title,
-                        composer: composer,
-                        url: url
-                    });
+                // Send data to Google Sheets using POST request
+                fetch(appUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(musicData)
+                })
+                .then(response => response.json())
+                .then(data => {
                     alert('Music uploaded successfully!');
-                    loadMusic();  // Reload the music list after adding new data
-                    document.getElementById("uploadForm").style.display = 'none';  // Close the form
-                } catch (error) {
+                    displayMusic(); // Reload music list after upload
+                })
+                .catch(error => {
                     console.error('Error uploading music:', error);
-                }
+                });
             } else {
-                alert("Please fill in all fields!");
+                alert('Please fill in all fields.');
             }
         }
 
-        loadMusic();
+        // Function to display music from Google Sheets
+        function displayMusic() {
+            fetch(appUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const musicList = document.getElementById("musicList");
+                    musicList.innerHTML = '';
+                    data.forEach(row => {
+                        const item = document.createElement('div');
+                        item.classList.add('music-item');
+                        item.innerHTML = `
+                            <h3>${row[0]} - ${row[1]}</h3>
+                            <audio controls>
+                                <source src="${row[2]}" type="audio/mp3">
+                                Your browser does not support the audio element.
+                            </audio>
+                        `;
+                        musicList.appendChild(item);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching music:', error);
+                });
+        }
+
+        // Display music when the page loads
+        displayMusic();
     </script>
 </body>
 </html>
