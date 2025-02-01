@@ -184,13 +184,13 @@
 
         function playAudio(mp3Url, title) {
             const audioSource = document.getElementById("audioSource");
-            audioSource.src = mp3Url;
-            audioPlayer.style.display = 'block';
-            audioPlayer.play();
-            currentSongDisplay.innerText = `Now playing: ${title}`;
+            audioSource.src = mp3Url; // Update the audio source
+            audioPlayer.style.display = 'block'; // Show the audio controls
+            audioPlayer.play(); // Start playing the song
+            currentSongDisplay.innerText = `Now playing: ${title}`; // Update the song title
 
             audioPlayer.onplay = function() {
-                seekBar.max = audioPlayer.duration;
+                seekBar.max = audioPlayer.duration; // Set the max value of the seek bar
                 updateSeekBar();
             };
 
