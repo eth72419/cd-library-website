@@ -12,8 +12,8 @@
             padding: 15px; 
             border: 1px solid #ccc; 
             display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center content horizontally */
             max-width: 1000px;
             margin-left: auto;
             margin-right: auto;
@@ -54,7 +54,7 @@
         }
         .movement-item audio {
             margin-left: 15px;
-            width: 80%; 
+            width: 80%; /* Audio player width adjusted */
         }
     </style>
 </head>
@@ -64,50 +64,59 @@
     <div id="musicList"></div>
 
     <script>
-        const appUrl = 'https://script.google.com/macros/s/AKfycbxEXvVPUJS51gQSB51sAVc_4wqE-GPmLBarxQ4vrDz8k-Q_8AswFiE9Yr0uNZVMy_XyNA/exec';
+        // URL to your hosted JSON TXT file
+        const jsonUrl = 'https://drive.google.com/uc?export=download&id=1q8cix_ufeM76OxaXB3YG5EcPf3Usxw9L';  // Replace with the actual URL of your hosted JSON file
 
+        // Function to display music from the hosted JSON file
         function displayMusic() {
-            fetch(appUrl)
-                .then(response => response.json())
+            fetch(jsonUrl)
+                .then(response => response.json())  // Parse the JSON data from the file
                 .then(data => {
                     const musicList = document.getElementById("musicList");
-                    musicList.innerHTML = '';
+                    musicList.innerHTML = ''; // Clear previous music list
                     data.forEach(row => {
                         const item = document.createElement('div');
                         item.classList.add('music-item');
 
-                        const discName = row[4];
-                        const albumArt = row[3];
+                        const discName = row.cd_title;  // Get CD Title
+                        const albumArt = row.album_art_url;  // Get album art URL
+                        const link = row.link;  // Get general link (Google Drive link for the entire album)
 
+                        // Create collapsible disc section
                         const discSection = document.createElement('div');
                         discSection.classList.add('disc');
-                        discSection.innerHTML = `${row[0]} - ${discName}`;
+                        discSection.innerHTML = `${discName}`;
 
+                        // Create a container for movements
                         const movementsContainer = document.createElement('div');
                         movementsContainer.classList.add('movements');
+                        
+                        // Loop through movements (MP3 URLs for each movement)
+                        row.movements.forEach(movement => {
+                            const movementTitle = movement.movement_title;  // Movement title
+                            const mp3Urls = movement.mp3_urls;  // MP3 URLs array
 
-                        for (let i = 6; i < row.length; i += 2) { 
-                            const trackTitle = row[i];
-                            const trackUrl = row[i + 1];
-                            if (trackTitle && trackUrl) {
+                            mp3Urls.forEach(mp3Url => {
                                 const movementItem = document.createElement('div');
                                 movementItem.classList.add('movement-item');
                                 movementItem.innerHTML = `
                                     <img class="album-art" src="${albumArt}" alt="Album Art">
                                     <div class="music-info">
-                                        <h4>${trackTitle}</h4>
+                                        <h4>${movementTitle}</h4>
                                         <audio controls>
-                                            <source src="${trackUrl.trim()}" type="audio/mp3">
+                                            <source src="${mp3Url}" type="audio/mp3">
                                             Your browser does not support the audio element.
                                         </audio>
                                     </div>
                                 `;
                                 movementsContainer.appendChild(movementItem);
-                            }
-                        }
+                            });
+                        });
 
+                        // Append the collapsible section with movements
                         discSection.addEventListener('click', () => {
-                            movementsContainer.style.display = movementsContainer.style.display === 'block' ? 'none' : 'block';
+                            const isVisible = movementsContainer.style.display === 'block';
+                            movementsContainer.style.display = isVisible ? 'none' : 'block';
                         });
 
                         item.appendChild(discSection);
@@ -120,14 +129,21 @@
                 });
         }
 
+        // Function to search music based on input
         function searchMusic() {
             const query = document.getElementById("search").value.toLowerCase();
-            document.querySelectorAll('.music-item').forEach(item => {
+            const musicItems = document.querySelectorAll('.music-item');
+            musicItems.forEach(item => {
                 const title = item.querySelector('.disc').innerText.toLowerCase();
-                item.style.display = title.includes(query) ? 'block' : 'none';
+                if (title.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
             });
         }
 
+        // Display music when the page loads
         displayMusic();
     </script>
 </body>
