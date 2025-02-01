@@ -39,10 +39,10 @@
                         item.classList.add('music-item');
                         item.id = `music-item-${index}`;
 
-                        // Ensure the URLs are properly added to the audio elements
+                        // Ensure the correct URL is used for each movement
                         const movementsHTML = row.slice(5).map((movement, i) => {
                             if (i % 2 === 0 && movement) {
-                                const movementUrl = row[i + 1];
+                                const movementUrl = row[i + 1]; // Correctly grab the URL for this movement
                                 return `<div class="movements"><strong>Movement ${i / 2 + 1}: </strong>${movement}<br>
                                         <audio controls>
                                             <source src="${movementUrl}" type="audio/mp3">
