@@ -7,7 +7,9 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
-        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; }
+        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; display: flex; align-items: center; }
+        .album-art { max-width: 100px; margin-right: 20px; }
+        .music-info { text-align: left; }
     </style>
 </head>
 <body>
@@ -29,11 +31,14 @@
                         const item = document.createElement('div');
                         item.classList.add('music-item');
                         item.innerHTML = `
-                            <h3>${row[0]} - ${row[1]}</h3>
-                            <audio controls>
-                                <source src="${row[2]}" type="audio/mp3">
-                                Your browser does not support the audio element.
-                            </audio>
+                            <img class="album-art" src="${row[3]}" alt="Album Art">
+                            <div class="music-info">
+                                <h3>${row[0]} - ${row[1]}</h3>
+                                <audio controls>
+                                    <source src="${row[2]}" type="audio/mp3">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
                         `;
                         musicList.appendChild(item);
                     });
