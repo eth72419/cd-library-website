@@ -15,7 +15,7 @@
             overflow-x: hidden;
         }
         h1 {
-            margin-top: 20px;
+            margin-top: 80px;  /* Increased margin-top to add space below Full Collection button */
             color: #333;
         }
         #search {
@@ -132,7 +132,7 @@
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            margin-top: 30px;
+            margin-top: 20px; /* Reduced margin to avoid clipping */
             display: block; /* Ensure it's visible */
             position: absolute;
             top: 20px;
@@ -272,21 +272,35 @@
 
             currentSongText.textContent = `Now Playing: ${title}`;
             audioSource.src = src;
-            audioPlayer.load();
-            audioPlayer.play();
+            audioPlayer.load(); // Reload the audio element
         }
 
         function setupAudioPlayer() {
             const audioPlayer = document.getElementById('audio-player');
             const volumeBar = document.getElementById('volume-bar');
 
-            // Volume control
-            volumeBar.addEventListener('input', () => {
+            audioPlayer.volume = volumeBar.value / 100;
+
+            volumeBar.addEventListener('input', function () {
                 audioPlayer.volume = volumeBar.value / 100;
             });
         }
 
-        displayMusic();
+        function searchMusic() {
+            const searchQuery = document.getElementById('search').value.toLowerCase();
+            const musicItems = document.querySelectorAll('.music-item');
+            musicItems.forEach(item => {
+                const discName = item.querySelector('.disc').textContent.toLowerCase();
+                const movements = item.querySelector('.movements');
+                if (discName.includes(searchQuery)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        displayMusic(); // Call to display the music after the page loads
     </script>
 </body>
 </html>
