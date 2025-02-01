@@ -43,7 +43,7 @@
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const db = firebase.firestore();  // Initialize Firestore AFTER Firebase is initialized
 
         // Load music from Firestore
         async function loadMusic() {
