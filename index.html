@@ -7,7 +7,14 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         #search { width: 50%; padding: 10px; margin: 10px; }
-        .music-item { margin: 10px; padding: 10px; border: 1px solid #ccc; display: flex; align-items: center; }
+        .music-item { 
+            margin: 10px; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; /* Ensures album art and audio player stay aligned */
+        }
         .album-art { max-width: 100px; margin-right: 20px; }
         .music-info { text-align: left; }
     </style>
@@ -55,10 +62,13 @@
 
             musicItems.forEach(item => {
                 const title = item.querySelector('h3').textContent.toLowerCase();
+                const albumArt = item.querySelector('.album-art');
+                
+                // Check if the title or composer matches the search query
                 if (title.includes(query)) {
-                    item.style.display = 'block'; // Show item if it matches the search query
+                    item.style.display = 'flex'; // Show the item if it matches
                 } else {
-                    item.style.display = 'none'; // Hide item if it doesn't match the search query
+                    item.style.display = 'none'; // Hide the item if it doesn't match
                 }
             });
         }
