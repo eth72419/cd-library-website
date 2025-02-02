@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The CDStore 💿</title>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -16,7 +15,7 @@
             overflow-x: hidden;
         }
         h1 {
-            margin-top: 20px;
+            margin-top: 80px;  /* Increased margin-top to add space below Full Collection button */
             color: #333;
         }
         #search {
@@ -108,21 +107,67 @@
             align-items: center;
             width: 100%;
             max-width: 400px;
+            justify-content: center;
+            margin-top: 10px;
         }
         .volume-bar-container input {
             width: 80%;
             margin: 0 10px;
         }
         .volume-bar-container i {
-            font-size: 20px;
+            font-size: 18px;
             color: #666;
         }
         .spacer {
-            height: 150px; /* Adjust this value to make the gap bigger or smaller */
+            height: 150px;
+        }
+
+        /* Full Collection Button at the top */
+        .full-collection-button {
+            background-color: #007bff;
+            color: white;
+            font-size: 18px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px; /* Reduced margin to avoid clipping */
+            display: block; /* Ensure it's visible */
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .full-collection-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Colors for better UI */
+        body {
+            background-color: #f4f6f9;
+        }
+        .music-item {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+        }
+        .disc {
+            background-color: #eef2f7;
+            border-radius: 10px;
+        }
+        .disc:hover {
+            background-color: #d0d7e0;
+        }
+        #current-song {
+            color: #333;
         }
     </style>
 </head>
 <body>
+    <!-- Full Collection Button at the top -->
+    <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
+
     <h1>Welcome to The CDStore 💿</h1>
     <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
     <div id="musicList"></div>
@@ -141,19 +186,25 @@
         </div>
     </div>
 
+    <!-- Comment Section -->
+    <div id="comment-section">
+        <textarea id="comment-input" rows="4" placeholder="Leave a comment..."></textarea>
+        <button onclick="postComment()">Post Comment</button>
+        <div id="comment-list"></div>
+    </div>
+
     <script>
         const jsonUrl = 'https://gist.githubusercontent.com/raw/8020d6c66bad103e558bfc667e66bf94';
+        const googleSheetUrl = 'YOUR_GOOGLE_SHEET_URL_HERE'; // Replace with your Google Sheets API endpoint URL
         let currentAudio = null;
 
+        // Show "Full Collection" button after music is loaded
         function displayMusic() {
-            fetch(jsonUrl, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',  
-                }
-            })
+            fetch(jsonUrl)
             .then(response => response.json())
             .then(data => {
+                console.log(data); // Log data for debugging
+
                 const musicList = document.getElementById("musicList");
                 musicList.innerHTML = '';
 
@@ -209,6 +260,10 @@
                         musicList.appendChild(item);
                     });
                 }
+
+                // Now that music is loaded, show the "Full Collection" button
+                const fullCollectionBtn = document.getElementById("full-collection-btn");
+                fullCollectionBtn.style.display = 'block'; // Show the button
             })
             .catch(error => {
                 console.error('Error fetching music:', error);
@@ -222,30 +277,85 @@
 
             currentSongText.textContent = `Now Playing: ${title}`;
             audioSource.src = src;
-            audioPlayer.load();
-            audioPlayer.play();
+            audioPlayer.load(); // Reload the audio element
         }
 
         function setupAudioPlayer() {
             const audioPlayer = document.getElementById('audio-player');
             const volumeBar = document.getElementById('volume-bar');
 
-            // Volume control
-            volumeBar.addEventListener('input', () => {
+            audioPlayer.volume = volumeBar.value / 100;
+
+            volumeBar.addEventListener('input', function () {
                 audioPlayer.volume = volumeBar.value / 100;
             });
         }
 
         function searchMusic() {
-            const query = document.getElementById("search").value.toLowerCase();
+            const searchQuery = document.getElementById('search').value.toLowerCase();
             const musicItems = document.querySelectorAll('.music-item');
             musicItems.forEach(item => {
-                const title = item.querySelector('.disc').innerText.toLowerCase();
-                item.style.display = title.includes(query) ? 'block' : 'none';
+                const discName = item.querySelector('.disc').textContent.toLowerCase();
+                const movements = item.querySelector('.movements');
+                if (discName.includes(searchQuery)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
             });
         }
 
+        // Post a comment to the Google Sheet
+        function postComment() {
+            const commentInput = document.getElementById('comment-input');
+            const commentText = commentInput ? commentInput.value : ''; // Use conditional check
+            if (commentText.trim() === '') {
+                alert('Please write a comment!');
+                return;
+            }
+            
+            // Send the comment to Google Sheets (add the Google Sheets integration)
+            const data = {
+                'comment': commentText
+            };
+
+            fetch(googleSheetUrl, {
+                method: 'POST',
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(responseData => {
+                alert('Comment posted successfully!');
+                commentInput.value = ''; // Clear the comment input after posting
+                loadComments(); // Reload comments after posting
+            })
+            .catch(error => {
+                console.error('Error posting comment:', error);
+                alert('Failed to post comment.');
+            });
+        }
+
+        // Load comments from Google Sheet
+        function loadComments() {
+            fetch(googleSheetUrl)
+            .then(response => response.json())
+            .then(data => {
+                const commentList = document.getElementById('comment-list');
+                commentList.innerHTML = '';
+                data.forEach(comment => {
+                    const commentDiv = document.createElement('div');
+                    commentDiv.textContent = comment.comment;
+                    commentList.appendChild(commentDiv);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading comments:', error);
+            });
+        }
+
+        // Initialize the music display and load comments
         displayMusic();
+        loadComments();
     </script>
 </body>
 </html>
