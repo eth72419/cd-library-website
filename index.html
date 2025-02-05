@@ -17,6 +17,7 @@
         h1 {
             margin-top: 80px;
             color: #333;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         #search {
             width: 50%;
@@ -25,6 +26,7 @@
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         .music-item {
             margin: 15px auto;
@@ -36,12 +38,14 @@
             max-width: 1000px;
             background-color: white;
             border-radius: 8px;
+            cursor: default;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         .album-art {
             width: 120px;
             height: 120px;
             object-fit: cover;
-            margin-right: 10px;
+            margin-right: 15px;
             border-radius: 8px;
         }
         .album-art-large {
@@ -62,6 +66,7 @@
             border-radius: 8px;
             width: 100%;
             justify-content: flex-start;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         .disc:hover {
             background-color: #e0e0e0;
@@ -72,8 +77,8 @@
             justify-content: center;
         }
         .track {
-            width: 120px;
-            height: 120px;
+            width: 150px;
+            height: 150px;
             background-color: #f1f1f1;
             margin: 10px;
             border-radius: 8px;
@@ -83,6 +88,8 @@
             cursor: pointer;
             font-weight: bold;
             transition: background-color 0.3s;
+            font-size: 16px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         .track:hover {
             background-color: #d0d7e0;
@@ -107,6 +114,7 @@
             margin-bottom: 10px;
             font-size: 18px;
             color: #333;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         }
         .volume-bar-container {
             display: flex;
@@ -136,36 +144,50 @@
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
+            width: 100%;
+            display: inline-block;
             margin-top: 20px;
-            display: block;
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         .full-collection-button:hover {
             background-color: #0056b3;
         }
-        body {
+        #changelog {
             background-color: #f4f6f9;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            display: none;
+            width: 90%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .music-item {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-        }
-        .disc {
-            background-color: #eef2f7;
-            border-radius: 10px;
-        }
-        .disc:hover {
-            background-color: #d0d7e0;
-        }
-        #current-song {
+        .changelog-title {
+            font-size: 20px;
+            font-weight: bold;
             color: #333;
         }
-        .disc h3 {
-            margin: 0;
-            color: #333;
+        .changelog-body {
+            font-size: 16px;
+            color: #555;
+        }
+        .expand-collapse-btn {
+            background-color: #28a745;
+            color: white;
+            font-size: 14px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 150px;
+            text-align: center;
+            margin-top: 15px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .expand-collapse-btn:hover {
+            background-color: #218838;
         }
     </style>
 </head>
@@ -177,10 +199,16 @@
     </div>
 
     <div id="content-container" style="display: none;">
+        <h1>The CDStore 💿</h1>
         <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
 
-        <h1>Welcome to The CDStore 💿</h1>
+        <div id="changelog" class="changelog-wrapper">
+            <div class="changelog-title" id="changelog-title">No recent updates</div>
+            <div class="changelog-body" id="changelog-body">NO RECENT UPDATES</div>
+        </div>
+
         <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
+
         <div id="musicList"></div>
 
         <div class="spacer"></div>
@@ -199,6 +227,22 @@
     </div>
 
     <script>
+        // Changelog functionality
+        function updateChangelog(changelogTitle, changelogBody) {
+            const changelogElement = document.getElementById('changelog');
+            const changelogTitleElement = document.getElementById('changelog-title');
+            const changelogBodyElement = document.getElementById('changelog-body');
+
+            if (!changelogTitle || !changelogBody) {
+                changelogElement.style.display = 'none';
+                return;
+            }
+
+            changelogElement.style.display = 'block';
+            changelogTitleElement.textContent = changelogTitle || 'No updates available';
+            changelogBodyElement.textContent = changelogBody || 'No recent updates';
+        }
+
         // Cookie functions
         function setCookie(name, value, days) {
             const d = new Date();
@@ -217,91 +261,72 @@
             return "";
         }
 
-        // Checking if the passcode is saved
         if (getCookie('verified') === 'true') {
             document.getElementById("passcode-container").style.display = 'none';
             document.getElementById("content-container").style.display = 'block';
             displayMusic();
+            updateChangelog('No recent updates', 'NO RECENT UPDATES');
         }
 
-        // Obfuscated passcode check function
-        const passcodeHash = btoa('AnimalsofManorFarm');  // Base64 encode the passcode
+        const passcodeHash = btoa('AnimalsofManorFarm');  
 
         function checkPasscode() {
             const enteredPasscode = document.getElementById('passcode-input').value;
-            const decodedPasscode = atob(passcodeHash); // Decode the base64 encoded passcode
+            const decodedPasscode = atob(passcodeHash);
 
             if (enteredPasscode === decodedPasscode) {
-                setCookie('verified', 'true', 365); // Set cookie for 365 days
+                setCookie('verified', 'true', 365);
                 document.getElementById("passcode-container").style.display = 'none';
                 document.getElementById("content-container").style.display = 'block';
                 displayMusic();
+                updateChangelog('No recent updates', 'NO RECENT UPDATES');
             } else {
                 alert('Incorrect passcode!');
             }
         }
 
         function displayMusic() {
-            fetch('https://gist.githubusercontent.com/raw/8020d6c66bad103e558bfc667e66bf94')  // Replace with your JSON endpoint if needed
-            .then(response => response.json())
-            .then(data => {
-                const musicList = document.getElementById("musicList");
-                musicList.innerHTML = '';
-                data.forEach(row => {
-                    const item = document.createElement('div');
-                    item.classList.add('music-item');
-                    const discName = row.cd_title;
-                    const albumArt = row.album_art_url;
-                    const discSection = document.createElement('div');
-                    discSection.classList.add('disc');
-                    discSection.innerHTML = `
-                        <img class="album-art" src="${albumArt}" alt="Album Art">
-                        <h3>${decodeURIComponent(discName)}</h3>
-                    `;
-                    item.appendChild(discSection);
-
-                    const tracksContainer = document.createElement('div');
-                    tracksContainer.classList.add('tracks-container');
-                    row.movements.forEach(movement => {
-                        const trackDiv = document.createElement('div');
-                        trackDiv.classList.add('track');
-                        trackDiv.innerHTML = decodeURIComponent(movement.movement_title);
-                        trackDiv.onclick = function() {
-                            playTrack(movement.mp3_urls[0]);
-                        };
-                        tracksContainer.appendChild(trackDiv);
+            fetch('https://gist.githubusercontent.com/eth72419/8020d6c66bad103e558bfc667e66bf94/raw/e972205494f36a9759b64d5fa3146e600252540f/gistfile1.txt')
+                .then(response => response.json())
+                .then(data => {
+                    const musicList = document.getElementById("musicList");
+                    musicList.innerHTML = '';
+                    data.forEach(cd => {
+                        const musicItem = document.createElement("div");
+                        musicItem.classList.add('music-item');
+                        
+                        musicItem.innerHTML = `
+                            <div class="disc">
+                                <img src="${cd.artwork}" class="album-art">
+                                <div>${cd.album}</div>
+                                <button class="expand-collapse-btn" onclick="toggleTracks('${cd.album}')">+</button>
+                            </div>
+                            <div class="tracks-container" id="${cd.album}-tracks" style="display: none;">
+                                ${cd.tracks && Array.isArray(cd.tracks) ? cd.tracks.map(track => `
+                                    <div class="track">${track}</div>
+                                `).join('') : ''}
+                            </div>
+                        `;
+                        musicList.appendChild(musicItem);
                     });
-
-                    item.appendChild(tracksContainer);
-                    musicList.appendChild(item);
                 });
-            });
         }
 
-        function playTrack(url) {
-            const player = document.getElementById("audio-player");
-            const source = document.getElementById("audio-source");
-            source.src = url;
-            player.load();
-            player.play();
-            document.getElementById("current-song").textContent = "Now Playing: " + url;
+        function toggleTracks(albumName) {
+            const trackContainer = document.getElementById(`${albumName}-tracks`);
+            const isVisible = trackContainer.style.display === 'flex';
+            trackContainer.style.display = isVisible ? 'none' : 'flex';
         }
 
         function changeVolume() {
-            const player = document.getElementById("audio-player");
-            const volume = document.getElementById("volume-bar").value / 100;
-            player.volume = volume;
+            const volumeBar = document.getElementById('volume-bar');
+            const audioPlayer = document.getElementById('audio-player');
+            audioPlayer.volume = volumeBar.value / 100;
         }
 
-        function searchMusic() {
-            const query = document.getElementById("search").value.toLowerCase();
-            const items = document.getElementsByClassName("music-item");
-
-            Array.from(items).forEach(item => {
-                const title = item.querySelector("h3").textContent.toLowerCase();
-                item.style.display = title.includes(query) ? 'block' : 'none';
-            });
-        }
+        window.onload = function() {
+            updateChangelog('No recent updates', 'NO RECENT UPDATES');
+        };
     </script>
 </body>
 </html>
