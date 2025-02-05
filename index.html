@@ -38,7 +38,7 @@
             max-width: 1000px;
             background-color: white;
             border-radius: 8px;
-            cursor: default;
+            cursor: default; /* Prevent clicks on the entire album section */
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         .album-art {
@@ -144,9 +144,10 @@
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            width: 100%;
-            display: inline-block;
             margin-top: 20px;
+            display: block;
+            position: relative;
+            z-index: 1;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
         .full-collection-button:hover {
@@ -158,7 +159,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
-            display: none;
+            display: none; /* Hidden by default */
             width: 90%;
             max-width: 600px;
             margin-left: auto;
@@ -173,7 +174,10 @@
             font-size: 16px;
             color: #555;
         }
-        .expand-collapse-btn {
+        .changelog-wrapper {
+            display: none; /* Hidden until updates are provided */
+        }
+        .collapse-btn {
             background-color: #28a745;
             color: white;
             font-size: 14px;
@@ -181,12 +185,14 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            width: 150px;
+            margin-top: 20px;
+            display: block;
+            width: 200px;
             text-align: center;
-            margin-top: 15px;
+            margin: 10px auto;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
-        .expand-collapse-btn:hover {
+        .collapse-btn:hover {
             background-color: #218838;
         }
     </style>
@@ -202,12 +208,15 @@
         <h1>The CDStore 💿</h1>
         <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
 
+        <!-- Changelog Section -->
         <div id="changelog" class="changelog-wrapper">
             <div class="changelog-title" id="changelog-title">No recent updates</div>
             <div class="changelog-body" id="changelog-body">NO RECENT UPDATES</div>
         </div>
 
         <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
+
+        <div class="collapse-btn" onclick="toggleSections()">Collapse/Expand All</div>
 
         <div id="musicList"></div>
 
@@ -228,19 +237,17 @@
 
     <script>
         // Changelog functionality
-        function updateChangelog(changelogTitle, changelogBody) {
-            const changelogElement = document.getElementById('changelog');
-            const changelogTitleElement = document.getElementById('changelog-title');
-            const changelogBodyElement = document.getElementById('changelog-body');
+        const changelogTitle = 'Update 1: 5/2/2025';  // Change this as needed
+        const changelogBody = 'Hiya! The entire site has been password locked (it is possible to find this password in the code, but I will assume you do not know how to do so. Also, the design has been completely overhauled! Hopefully it looks much better now! Unfortunately, the search feature is broken - and I have not found a way for each individual CD to collapse yet. Please excuse me for the horrendous centering. The website saves a cookie to your device to ensure that it knows you have entered the password right at least once!';  // Change this as needed
 
-            if (!changelogTitle || !changelogBody) {
-                changelogElement.style.display = 'none';
-                return;
+        function updateChangelog() {
+            if (changelogTitle === 'NO RECENT UPDATES' && changelogBody === 'NO RECENT UPDATES') {
+                document.getElementById('changelog').style.display = 'none'; // Hide changelog if no updates
+            } else {
+                document.getElementById('changelog').style.display = 'block';
+                document.getElementById('changelog-title').textContent = changelogTitle;
+                document.getElementById('changelog-body').textContent = changelogBody;
             }
-
-            changelogElement.style.display = 'block';
-            changelogTitleElement.textContent = changelogTitle || 'No updates available';
-            changelogBodyElement.textContent = changelogBody || 'No recent updates';
         }
 
         // Cookie functions
@@ -261,71 +268,103 @@
             return "";
         }
 
+        // Checking if the passcode is saved
         if (getCookie('verified') === 'true') {
             document.getElementById("passcode-container").style.display = 'none';
             document.getElementById("content-container").style.display = 'block';
             displayMusic();
-            updateChangelog('No recent updates', 'NO RECENT UPDATES');
+            updateChangelog();  // Update changelog when content is loaded
         }
 
-        const passcodeHash = btoa('AnimalsofManorFarm');  
+        // Obfuscated passcode check function
+        const passcodeHash = btoa('AnimalsofManorFarm');  // Base64 encode the passcode
 
         function checkPasscode() {
             const enteredPasscode = document.getElementById('passcode-input').value;
-            const decodedPasscode = atob(passcodeHash);
+            const decodedPasscode = atob(passcodeHash); // Decode the base64 encoded passcode
 
             if (enteredPasscode === decodedPasscode) {
-                setCookie('verified', 'true', 365);
+                setCookie('verified', 'true', 365); // Set cookie for 365 days
                 document.getElementById("passcode-container").style.display = 'none';
                 document.getElementById("content-container").style.display = 'block';
                 displayMusic();
-                updateChangelog('No recent updates', 'NO RECENT UPDATES');
+                updateChangelog();  // Update changelog when passcode is verified
             } else {
                 alert('Incorrect passcode!');
             }
         }
 
         function displayMusic() {
-            fetch('https://gist.githubusercontent.com/eth72419/8020d6c66bad103e558bfc667e66bf94/raw/e972205494f36a9759b64d5fa3146e600252540f/gistfile1.txt')
-                .then(response => response.json())
-                .then(data => {
-                    const musicList = document.getElementById("musicList");
-                    musicList.innerHTML = '';
-                    data.forEach(cd => {
-                        const musicItem = document.createElement("div");
-                        musicItem.classList.add('music-item');
-                        
-                        musicItem.innerHTML = `
-                            <div class="disc">
-                                <img src="${cd.artwork}" class="album-art">
-                                <div>${cd.album}</div>
-                                <button class="expand-collapse-btn" onclick="toggleTracks('${cd.album}')">+</button>
-                            </div>
-                            <div class="tracks-container" id="${cd.album}-tracks" style="display: none;">
-                                ${cd.tracks && Array.isArray(cd.tracks) ? cd.tracks.map(track => `
-                                    <div class="track">${track}</div>
-                                `).join('') : ''}
-                            </div>
-                        `;
-                        musicList.appendChild(musicItem);
+            fetch('https://gist.githubusercontent.com/raw/8020d6c66bad103e558bfc667e66bf94')  // Replace with your JSON endpoint if needed
+            .then(response => response.json())
+            .then(data => {
+                const musicList = document.getElementById("musicList");
+                musicList.innerHTML = '';
+                data.forEach(row => {
+                    const item = document.createElement('div');
+                    item.classList.add('music-item');
+                    const discName = row.cd_title;
+                    const albumArt = row.album_art_url;
+                    const discSection = document.createElement('div');
+                    discSection.classList.add('disc');
+                    discSection.innerHTML = `
+                        <img class="album-art" src="${albumArt}" alt="Album Art">
+                        <h3>${decodeURIComponent(discName)}</h3>
+                    `;
+                    item.appendChild(discSection);
+
+                    const tracksContainer = document.createElement('div');
+                    tracksContainer.classList.add('tracks-container');
+                    row.movements.forEach(movement => {
+                        const trackDiv = document.createElement('div');
+                        trackDiv.classList.add('track');
+                        trackDiv.innerHTML = decodeURIComponent(movement.movement_title);
+                        trackDiv.onclick = function() {
+                            playTrack(movement.mp3_urls[0], movement.movement_title);
+                        };
+                        tracksContainer.appendChild(trackDiv);
                     });
+                    item.appendChild(tracksContainer);
+                    musicList.appendChild(item);
                 });
+            });
         }
 
-        function toggleTracks(albumName) {
-            const trackContainer = document.getElementById(`${albumName}-tracks`);
-            const isVisible = trackContainer.style.display === 'flex';
-            trackContainer.style.display = isVisible ? 'none' : 'flex';
-        }
-
-        function changeVolume() {
-            const volumeBar = document.getElementById('volume-bar');
+        // Play selected track
+        function playTrack(mp3Url, trackName) {
             const audioPlayer = document.getElementById('audio-player');
+            const audioSource = document.getElementById('audio-source');
+            audioSource.src = mp3Url;
+            audioPlayer.load();
+            audioPlayer.play();
+            document.getElementById('current-song').textContent = trackName;
+        }
+
+        // Volume control
+        function changeVolume() {
+            const audioPlayer = document.getElementById('audio-player');
+            const volumeBar = document.getElementById('volume-bar');
             audioPlayer.volume = volumeBar.value / 100;
         }
 
+        // Collapse/Expand functionality for CD sections
+        let sectionsCollapsed = true;
+
+        function toggleSections() {
+            const musicItems = document.querySelectorAll('.music-item');
+            sectionsCollapsed = !sectionsCollapsed;
+
+            musicItems.forEach(item => {
+                item.style.display = sectionsCollapsed ? 'none' : 'flex';
+            });
+        }
+
         window.onload = function() {
-            updateChangelog('No recent updates', 'NO RECENT UPDATES');
+            updateChangelog();
+            const musicItems = document.querySelectorAll('.music-item');
+            musicItems.forEach(item => {
+                item.style.display = 'none'; // Collapse all initially
+            });
         };
     </script>
 </body>
