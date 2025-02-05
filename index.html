@@ -225,7 +225,7 @@
         }
 
         // Obfuscated passcode check function
-        const passcodeHash = btoa('HabsBoys2024');  // Base64 encode the passcode
+        const passcodeHash = QW5pbWFsc29mTWFub3JGYXJt;  // Base64 encode the passcode
 
         function checkPasscode() {
             const enteredPasscode = document.getElementById('passcode-input').value;
@@ -242,7 +242,7 @@
         }
 
         function displayMusic() {
-            fetch('https://gist.githubusercontent.com/raw/8020d6c66bad103e558bfc667e66bf94')
+            fetch('https://gist.githubusercontent.com/raw/8020d6c66bad103e558bfc667e66bf94')  // Replace with your JSON endpoint if needed
             .then(response => response.json())
             .then(data => {
                 const musicList = document.getElementById("musicList");
@@ -256,18 +256,18 @@
                     discSection.classList.add('disc');
                     discSection.innerHTML = `
                         <img class="album-art" src="${albumArt}" alt="Album Art">
-                        <h3>${discName}</h3>
+                        <h3>${decodeURIComponent(discName)}</h3>
                     `;
                     item.appendChild(discSection);
 
                     const tracksContainer = document.createElement('div');
                     tracksContainer.classList.add('tracks-container');
-                    row.tracks.forEach(track => {
+                    row.movements.forEach(movement => {
                         const trackDiv = document.createElement('div');
                         trackDiv.classList.add('track');
-                        trackDiv.innerHTML = track.name;
+                        trackDiv.innerHTML = decodeURIComponent(movement.movement_title);
                         trackDiv.onclick = function() {
-                            playTrack(track.url);
+                            playTrack(movement.mp3_urls[0]);
                         };
                         tracksContainer.appendChild(trackDiv);
                     });
