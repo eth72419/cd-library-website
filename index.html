@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0040)file:///C:/users/lapto/desktop/test.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The CDStore 💿</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./The CDStore 💿_files/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -198,33 +198,63 @@
     </style>
 </head>
 <body>
-    <div id="passcode-container">
+    <div id="passcode-container" style="display: none;">
         <h1>Enter Passcode</h1>
         <input type="password" id="passcode-input" placeholder="Enter passcode...">
         <button onclick="checkPasscode()">Submit</button>
     </div>
 
-    <div id="content-container" style="display: none;">
+    <div id="content-container" style="display: block;">
         <h1>The CDStore 💿</h1>
         <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
 
         <!-- Changelog Section -->
-        <div id="changelog" class="changelog-wrapper">
-            <div class="changelog-title" id="changelog-title">No recent updates</div>
-            <div class="changelog-body" id="changelog-body">NO RECENT UPDATES</div>
+        <div id="changelog" class="changelog-wrapper" style="display: block;">
+            <div class="changelog-title" id="changelog-title">Update 1: 5/2/2025</div>
+            <div class="changelog-body" id="changelog-body">Hiya! The entire site has been password locked (it is possible to find this password in the code, but I will assume you do not know how to do so. Also, the design has been completely overhauled! Hopefully it looks much better now! Unfortunately, the search feature is broken - and I have not found a way for each individual CD to collapse yet. Please excuse me for the horrendous centering. The website saves a cookie to your device to ensure that it knows you have entered the password right at least once!</div>
         </div>
 
         <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
 
         <div class="collapse-btn" onclick="toggleSections()">Collapse/Expand All</div>
 
-        <div id="musicList"></div>
+        <div id="musicList"><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/image.png" alt="Album Art">
+                        <h3>Bizet - Symphony In C: L'ArlÃ©sienne, Suites Nos 1 &amp; 2</h3>
+                    </div><div class="tracks-container"><div class="track">01 Bizet - Symphony #1 In C - 1. Allegro Vivo</div><div class="track">02 Bizet - Symphony #1 In C - 2. Adagio</div><div class="track">03 Bizet - Symphony #1 In C - 3. Allegro Vivace</div><div class="track">04 Bizet - Symphony #1 In C - 4. Allegro Vivace</div><div class="track">05 Bizet - L'ArlÃ©sienne Suite #1 - PrÃ©lude</div><div class="track">06 Bizet - L'ArlÃ©sienne Suite #1 - Minuetto</div><div class="track">07 Bizet - L'ArlÃ©sienne Suite #1 - Adagietto</div><div class="track">08 Bizet - L'ArlÃ©sienne Suite #1 - Carillon</div><div class="track">09 Bizet - L'ArlÃ©sienne Suite #2 - Pastorale</div><div class="track">10 Bizet - L'ArlÃ©sienne Suite #2 - Intermezzo</div><div class="track">11 Bizet - L'ArlÃ©sienne Suite #2 - Menuet</div><div class="track">12 Bizet - L'ArlÃ©sienne Suite #2 - Farandole</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/image(1).png" alt="Album Art">
+                        <h3>Mozart Piano Concertos 14 and 27, Rondo K382</h3>
+                    </div><div class="tracks-container"><div class="track">01 Mozart - Piano Concerto No.14 In E-Flat Major, K. 449 - I. Allegro Vivace</div><div class="track">02 Mozart - Piano Concerto No.14 In E-Flat Major, K. 449 - II. Andantino</div><div class="track">03 Mozart - Piano Concerto No.14 In E-Flat Major, K. 449 - III. Allegro Ma Non Troppo</div><div class="track">04 Mozart - Piano Concerto No.27 In B-Flat Major, Op. 17, K. 595 - I. Allegro</div><div class="track">05 Mozart - Piano Concerto No.27 In B-Flat Major, Op. 17, K. 595 - II. Larghetto</div><div class="track">06 Mozart - Piano Concerto No.27 In B-Flat Major, Op. 17, K. 595 - III. Allegro</div><div class="track">07 Mozart- Rondo In D Major, K. 382</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/image(2).png" alt="Album Art">
+                        <h3>Selections from Debussy: Suite Bergamasque, Prelude A L'apres-midi D'un faune, Children's Corner Suite, Preludes and Two Arabesques</h3>
+                    </div><div class="tracks-container"><div class="track">01 Debussy- Suite Bergamasque, L 75 - Prélude</div><div class="track">02 Debussy- Suite Bergamasque, L 75 - Menuet</div><div class="track">03 Debussy- Suite Bergamasque, L 75 - Clair De Lune</div><div class="track">04 Debussy- Suite Bergamasque, L 75 - Passepied</div><div class="track">05 Debussy- Prélude À L'Après-Midi D'Un Faune, L 86</div><div class="track">06 Debussy- Children's Corner, L 113 - Doctor Gradus Ad Parnassum</div><div class="track">07 Debussy- Children's Corner, L 113 - Jimbo's Lullaby.mp3</div><div class="track">08 Debussy- Children's Corner, L 113 - Serenade For The Doll</div><div class="track">09 Debussy- Children's Corner, L 113 - The Snow Is Dancing</div><div class="track">10 Debussy- Children's Corner, L 113 - The Little Shepherd</div><div class="track">11 Debussy- Children's Corner, L 113 - Golliwog's Cake -Walk</div><div class="track">12 Debussy- Syrinx For Solo Flute, L 129</div><div class="track">13 Debussy- Preludes, Book 1, L 117 - La Fille Aux Cheveux De Lin (The Girl With The Flaxen Hair)</div><div class="track">14 Debussy- Preludes, Book 1, L 117 - La Cathédrale Engloutie</div><div class="track">15 Debussy- Arabesques, L 66 - Arabesque #1 In E</div><div class="track">16 Debussy- Arabesques, L 66 - Arabesque #2 In G</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/image(3).png" alt="Album Art">
+                        <h3>Bach Violin Concertos [Disc 1]</h3>
+                    </div><div class="tracks-container"><div class="track">01 Bach- Violin Concerto In D Minor, BWV 1052R - 1. Allegro</div><div class="track">02 Bach- Violin Concerto In D Minor, BWV 1052R - 2. Adagio</div><div class="track">03 Bach- Violin Concerto In D Minor, BWV 1052R - 3. Allegro</div><div class="track">04 Bach- Ich Liebe Den Höchsten Von Ganzem Gemüte, Bwv 174 - 1. Sinfonia</div><div class="track">05 Bach- Violin Concerto #2 In E, BWV 1042 - 1. Allegro</div><div class="track">06 Bach- Violin Concerto #2 In E, BWV 1042 - 2. Adagio</div><div class="track">07 Bach- Violin Concerto #2 In E, BWV 1042 - 3. Allegro Assai</div><div class="track">08 Bach- Ich Hatte Viel Bekümmernis, Bwv 21 - 1. Sinfonia</div><div class="track">09 Bach- Trio Sonata #5 In C, BWV 529 - 1. Allegro</div><div class="track">10 Bach- Trio Sonata #5 In C, BWV 529 - 2. Largo</div><div class="track">11 Bach- Trio Sonata #5 In C, BWV 529 - 3. Allegro</div><div class="track">12 Bach- Concerto For Violin &amp; Oboe In C Minor, BWV 1060R - 1. Allegro</div><div class="track">13 Bach- Concerto For Violin &amp; Oboe In C Minor, BWV 1060R - 2. Adagio</div><div class="track">14 Bach- Concerto For Violin &amp; Oboe In C Minor, BWV 1060R - 3. Allegro</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/image(4).png" alt="Album Art">
+                        <h3>Habs Elstree Symphony Orchestra: Highlights</h3>
+                    </div><div class="tracks-container"><div class="track">Leonard Bernstein: Symphonic Dances from West Side Story</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/20250202-105034.jpg" alt="Album Art">
+                        <h3>Vaughan Williams - A Sea Symphony</h3>
+                    </div><div class="tracks-container"><div class="track">01 Vaughan Williams- Symphony #1, 'A Sea Symphony' - 1. A Song For All Seas, All Ships</div><div class="track">02 Vaughan Williams- Symphony #1, 'A Sea Symphony' - 2. On The Beach At Night, Alone</div><div class="track">03 Vaughan Williams- Symphony #1, 'A Sea Symphony' - 3. Scherzo- The Waves</div><div class="track">04 Vaughan Williams- Symphony #1, 'A Sea Symphony' - 4. The Explorers</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/Cam-Scanner-02-02-2025-11-33.jpg" alt="Album Art">
+                        <h3>Moussorgsky - Pictures at an Exhibition - Piano &amp; Orchestral version</h3>
+                    </div><div class="tracks-container"><div class="track">01 Mussorgsky- Pictures At An Exhibition - Promenade #1</div><div class="track">02 Mussorgsky- Pictures At An Exhibition - Gnomus</div><div class="track">03 Mussorgsky- Pictures At An Exhibition - Promenade #2</div><div class="track">04 Mussorgsky- Pictures At An Exhibition - The Old Castle</div><div class="track">05 Mussorgsky- Pictures At An Exhibition - Promenade #3</div><div class="track">06 Mussorgsky- Pictures At An Exhibition - Tuileries</div><div class="track">07 Mussorgsky- Pictures At An Exhibition - Bydlo</div><div class="track">08 Mussorgsky- Pictures At An Exhibition - Promenade #4</div><div class="track">09 Mussorgsky- Pictures At An Exhibition - Ballet Of The Unhatched Chicks</div><div class="track">10 Mussorgsky- Pictures At An Exhibition - Samuel Goldenburg &amp; Schmuyle</div><div class="track">11 Mussorgsky- Pictures At An Exhibition - Promenade #5</div><div class="track">12 Mussorgsky- Pictures At An Exhibition - The Marketplace At Limoges</div><div class="track">13 Mussorgsky- Pictures At An Exhibition - Catacombs</div><div class="track">14 Mussorgsky- Pictures At An Exhibition - Cum Mortuis In Lingua Mortua</div><div class="track">15 Mussorgsky- Pictures At An Exhibition - Baba Yaga</div><div class="track">16 Mussorgsky- Pictures At An Exhibition - The Great Gate Of Kiev</div><div class="track">17 Mussorgsky-Ravel- Pictures At An Exhibition - Promenade #1</div><div class="track">18 Mussorgsky-Ravel- Pictures At An Exhibition - Gnomus</div><div class="track">19 Mussorgsky-Ravel- Pictures At An Exhibition - Promenade #2</div><div class="track">20 Mussorgsky-Ravel- Pictures At An Exhibition - The Old Castle</div><div class="track">21 Mussorgsky-Ravel- Pictures At An Exhibition - Promenade #3</div><div class="track">22 Mussorgsky-Ravel- Pictures At An Exhibition - Tuileries</div><div class="track">23 Mussorgsky-Ravel- Pictures At An Exhibition - Bydlo</div><div class="track">24 Mussorgsky-Ravel- Pictures At An Exhibition - Promenade #4</div><div class="track">25 Mussorgsky-Ravel- Pictures At An Exhibition - Ballet Of The Unhatched Chicks</div><div class="track">26 Mussorgsky-Ravel- Pictures At An Exhibition - Samuel Goldenburg &amp; Schmuyle</div><div class="track">27 Mussorgsky-Ravel- Pictures At An Exhibition - The Market At Limoges</div><div class="track">28 Mussorgsky-Ravel- Pictures At An Exhibition - Roman Burial Catacombs</div><div class="track">29 Mussorgsky-Ravel- Pictures At An Exhibition - With The Dead In The Language Of Death</div><div class="track">30 Mussorgsky-Ravel- Pictures At An Exhibition - Baba Yaga</div><div class="track">31 Mussorgsky-Ravel- Pictures At An Exhibition - The Great Gate Of Kiev</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/image(3).png" alt="Album Art">
+                        <h3>Bach Violin Concertos [Disc 2]</h3>
+                    </div><div class="tracks-container"><div class="track">01 Bach- Orchestral Suite #2 In B Minor, BWV 1067 - Overture</div><div class="track">02 Bach- Orchestral Suite #2 In B Minor, BWV 1067 - Rondeau</div><div class="track">03 Bach- Orchestral Suite #2 In B Minor, BWV 1067 - Sarabande</div><div class="track">04 Bach- Orchestral Suite #2 In B Minor, BWV 1067 - Bourrées 1 &amp; 2</div><div class="track">05 Bach- Orchestral Suite #2 In B Minor, BWV 1067 - Polonaise</div><div class="track">06 Bach- Orchestral Suite #2 In B Minor, BWV 1067 - Menuet</div><div class="track">07 Bach- Orchestral Suite #2 In B Minor, BWV 1067 - Badinerie</div><div class="track">08 Bach- Trio Sonata #3 In D Minor, BWV 527 - 1. Andante</div><div class="track">09 Bach- Trio Sonata #3 In D Minor, BWV 527 - 2. Adagio E Dolce</div><div class="track">10 Bach- Trio Sonata #3 In D Minor, BWV 527 - 3. Vivace</div><div class="track">11 Bach- Violin Concerto In G Minor, BWV 1056R - 1. Allegro</div><div class="track">12 Bach- Violin Concerto In G Minor, BWV 1056R - 2. Largo</div><div class="track">13 Bach- Violin Concerto In G Minor, BWV 1056R - 3. Presto</div><div class="track">14 Bach- Himmelskönig, Sei Willkommen, Bwv 182 - 1. Sonata</div><div class="track">15 Bach- Violin Concerto #1 In A Minor, BWV 1041 - 1. (Allegro)</div><div class="track">16 Bach- Violin Concerto #1 In A Minor, BWV 1041 - 2. Andante</div><div class="track">17 Bach- Violin Concerto #1 In A Minor, BWV 1041 - 3. Allegro Assai</div><div class="track">18 Bach- Sinfonia In D, Bwv 1045</div><div class="track">19 Bach- Concerto In D Minor For 2 Violins, BWV 1043, 'Double' - 1. Vivace</div><div class="track">20 Bach- Concerto In D Minor For 2 Violins, BWV 1043, 'Double' - 2. Largo Ma Non Tanto</div><div class="track">21 Bach- Concerto In D Minor For 2 Violins, BWV 1043, 'Double' - 3. Allegro</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/Cam-Scanner-02-02-2025-12-14.jpg" alt="Album Art">
+                        <h3>Trumpet Spectacular</h3>
+                    </div><div class="tracks-container"><div class="track">01 Bellstedt-Fazzi- Napoli - Canzone Napolitana Con Variazioni</div><div class="track">02 Rossini-Kunzel- The Barber Of Seville - Act 1- Largo Al Factotum</div><div class="track">03 Clarke- Trumpet Voluntary In D</div><div class="track">04 Bach-Kunzel- Jesu, Joy Of Man's Desiring</div><div class="track">05 Rimsky-Korsakov-Newsom- Flight Of The Bumblebee</div><div class="track">06 Bizet-Proto- Carmen Fantasy For Trumpet &amp; Orchestra</div><div class="track">07 Puccini-Fazzi- Medley Of Famous Tenor Arias</div><div class="track">08 Rossini-Kunzel- La Danza</div><div class="track">09 Schumann-Kunzel- Traumerei</div><div class="track">10 Staiger-Fazzi- Carnival Of Venice</div><div class="track">11 Anderson- A Trumpeter's Lullaby</div><div class="track">12 Bach-Fazzi- Chaconne</div></div></div><div class="music-item"><div class="disc">
+                        <img class="album-art" src="./The CDStore 💿_files/Cam-Scanner-02-02-2025-12-28.jpg" alt="Album Art">
+                        <h3>Vaughan Williams- The Lark Ascending, Oboe Concerto; Walton- Henry V, Delius - 2 Pieces for Small Orchestra, Intermezzo</h3>
+                    </div><div class="tracks-container"><div class="track">01 Vaughan Williams- The Lark Ascending</div><div class="track">02 Vaughan Williams- Oboe Concerto In A Minor - 1. Rondo Pastorale</div><div class="track">03 Vaughan Williams- Oboe Concerto In A Minor - 2. Minuet &amp; Musette</div><div class="track">04 Vaughan Williams- Oboe Concerto In A Minor - 3. Finale- Presto</div><div class="track">05 Walton- Henry V - Passacaglia- Death Of Falstaff</div><div class="track">06 Walton- Henry V - Touch Her Soft Lips &amp; Part</div><div class="track">07 Delius- 2 Pieces For Small Orchestra - 1. On Hearing The First Cuckoo In Spring</div><div class="track">08 Delius- 2 Pieces For Small Orchestra - 2. Summer Night On The River</div><div class="track">09 Delius- Fennimore &amp; Gerda - Intermezzo</div><div class="track">10 Delius- 2 Aquarelles - 1. Lento, Ma Non Troppo</div><div class="track">[Thank you for your interest. My storage provider is having issues, so movements 10 and 11 are not available. Sorry!]</div></div></div></div>
 
         <div class="spacer"></div>
 
         <div id="player-container">
             <div id="current-song">No song playing</div>
-            <audio id="audio-player" controls style="width: 80%; max-width: 400px;">
+            <audio id="audio-player" controls="" style="width: 80%; max-width: 400px;">
                 <source id="audio-source" src="" type="audio/mp3">
                 Your browser does not support the audio element.
             </audio>
@@ -367,5 +397,6 @@
             });
         };
     </script>
-</body>
-</html>
+
+
+</body></html>
