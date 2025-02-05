@@ -15,7 +15,7 @@
             overflow-x: hidden;
         }
         h1 {
-            margin-top: 80px;  /* Increased margin-top to add space below Full Collection button */
+            margin-top: 80px;
             color: #333;
         }
         #search {
@@ -38,8 +38,8 @@
             border-radius: 8px;
         }
         .album-art {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             object-fit: cover;
             margin-right: 10px;
             border-radius: 8px;
@@ -66,20 +66,26 @@
         .disc:hover {
             background-color: #e0e0e0;
         }
-        .movements {
-            margin-top: 10px;
-            display: none;
-            margin-bottom: 20px;
-            width: 100%;
-            text-align: left;
+        .tracks-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
         }
-        .movement-item {
+        .track {
+            width: 120px;
+            height: 120px;
+            background-color: #f1f1f1;
+            margin: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
-        .movement-item h4 {
-            margin-left: 20px;
+        .track:hover {
+            background-color: #d0d7e0;
         }
         #player-container {
             display: flex;
@@ -121,8 +127,6 @@
         .spacer {
             height: 150px;
         }
-
-        /* Full Collection Button at the top */
         .full-collection-button {
             background-color: #007bff;
             color: white;
@@ -132,19 +136,16 @@
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            margin-top: 20px; /* Reduced margin to avoid clipping */
-            display: block; /* Ensure it's visible */
+            margin-top: 20px;
+            display: block;
             position: absolute;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
         }
-
         .full-collection-button:hover {
             background-color: #0056b3;
         }
-
-        /* Colors for better UI */
         body {
             background-color: #f4f6f9;
         }
@@ -162,200 +163,145 @@
         #current-song {
             color: #333;
         }
+        .disc h3 {
+            margin: 0;
+            color: #333;
+        }
     </style>
 </head>
 <body>
-    <!-- Full Collection Button at the top -->
-    <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
+    <div id="passcode-container">
+        <h1>Enter Passcode</h1>
+        <input type="password" id="passcode-input" placeholder="Enter passcode...">
+        <button onclick="checkPasscode()">Submit</button>
+    </div>
 
-    <h1>Welcome to The CDStore 💿</h1>
-    <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
-    <div id="musicList"></div>
+    <div id="content-container" style="display: none;">
+        <a href="https://www.libib.com/u/cdlist" class="full-collection-button" id="full-collection-btn">Full Collection</a>
 
-    <div class="spacer"></div> <!-- Large gap at the bottom of the page -->
+        <h1>Welcome to The CDStore 💿</h1>
+        <input type="text" id="search" placeholder="Search by CD name or movement..." onkeyup="searchMusic()">
+        <div id="musicList"></div>
 
-    <div id="player-container">
-        <div id="current-song">No song playing</div>
-        <audio id="audio-player" controls style="width: 80%; max-width: 400px;">
-            <source id="audio-source" src="" type="audio/mp3">
-            Your browser does not support the audio element.
-        </audio>
-        <div class="volume-bar-container">
-            <i class="fas fa-volume-up"></i>
-            <input type="range" id="volume-bar" value="100" step="1" min="0" max="100">
+        <div class="spacer"></div>
+
+        <div id="player-container">
+            <div id="current-song">No song playing</div>
+            <audio id="audio-player" controls style="width: 80%; max-width: 400px;">
+                <source id="audio-source" src="" type="audio/mp3">
+                Your browser does not support the audio element.
+            </audio>
+            <div class="volume-bar-container">
+                <i class="fas fa-volume-up"></i>
+                <input type="range" id="volume-bar" value="100" step="1" min="0" max="100" oninput="changeVolume()">
+            </div>
         </div>
     </div>
 
-    <!-- Comment Section -->
-    <div id="comment-section">
-        <textarea id="comment-input" rows="4" placeholder="Leave a comment..."></textarea>
-        <button onclick="postComment()">Post Comment</button>
-        <div id="comment-list"></div>
-    </div>
-
     <script>
-        const jsonUrl = 'https://gist.githubusercontent.com/raw/8020d6c66bad103e558bfc667e66bf94';
-        const googleSheetUrl = 'YOUR_GOOGLE_SHEET_URL_HERE'; // Replace with your Google Sheets API endpoint URL
-        let currentAudio = null;
+        // Cookie functions
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            let expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
 
-        // Show "Full Collection" button after music is loaded
+        function getCookie(name) {
+            let nameEq = name + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(nameEq) === 0) return c.substring(nameEq.length, c.length);
+            }
+            return "";
+        }
+
+        // Checking if the passcode is saved
+        if (getCookie('verified') === 'true') {
+            document.getElementById("passcode-container").style.display = 'none';
+            document.getElementById("content-container").style.display = 'block';
+            displayMusic();
+        }
+
+        // Obfuscated passcode check function
+        const passcodeHash = btoa('HabsBoys2024');  // Base64 encode the passcode
+
+        function checkPasscode() {
+            const enteredPasscode = document.getElementById('passcode-input').value;
+            const decodedPasscode = atob(passcodeHash); // Decode the base64 encoded passcode
+
+            if (enteredPasscode === decodedPasscode) {
+                setCookie('verified', 'true', 365); // Set cookie for 365 days
+                document.getElementById("passcode-container").style.display = 'none';
+                document.getElementById("content-container").style.display = 'block';
+                displayMusic();
+            } else {
+                alert('Incorrect passcode!');
+            }
+        }
+
         function displayMusic() {
-            fetch(jsonUrl)
+            fetch('https://gist.githubusercontent.com/raw/8020d6c66bad103e558bfc667e66bf94')
             .then(response => response.json())
             .then(data => {
-                console.log(data); // Log data for debugging
-
                 const musicList = document.getElementById("musicList");
                 musicList.innerHTML = '';
+                data.forEach(row => {
+                    const item = document.createElement('div');
+                    item.classList.add('music-item');
+                    const discName = row.cd_title;
+                    const albumArt = row.album_art_url;
+                    const discSection = document.createElement('div');
+                    discSection.classList.add('disc');
+                    discSection.innerHTML = `
+                        <img class="album-art" src="${albumArt}" alt="Album Art">
+                        <h3>${discName}</h3>
+                    `;
+                    item.appendChild(discSection);
 
-                if (data && Array.isArray(data)) {
-                    data.forEach(row => {
-                        const item = document.createElement('div');
-                        item.classList.add('music-item');
-
-                        const discName = row.cd_title;
-                        const albumArt = row.album_art_url;
-
-                        const discSection = document.createElement('div');
-                        discSection.classList.add('disc');
-                        discSection.innerHTML = `
-                            <img class="album-art" src="${albumArt}" alt="Album Art">
-                            ${discName}
-                        `;
-
-                        const movementsContainer = document.createElement('div');
-                        movementsContainer.classList.add('movements');
-
-                        row.movements.forEach(movement => {
-                            const movementTitle = movement.movement_title;
-                            const mp3Urls = movement.mp3_urls;
-
-                            mp3Urls.forEach(mp3Url => {
-                                const movementItem = document.createElement('div');
-                                movementItem.classList.add('movement-item');
-                                movementItem.innerHTML = `
-                                    <img class="album-art-large" src="${albumArt}" alt="Album Art">
-                                    <div class="movement-info">
-                                        <h4 style="margin-left: 20px;">${movementTitle}</h4>
-                                    </div>
-                                `;
-                                movementsContainer.appendChild(movementItem);
-
-                                // Make song title clickable
-                                const movementTitleElement = movementItem.querySelector('h4');
-                                movementTitleElement.addEventListener('click', () => {
-                                    updateCurrentSong(movementTitle, mp3Url);
-                                    setupAudioPlayer();
-                                });
-                            });
-                        });
-
-                        discSection.addEventListener('click', () => {
-                            const isVisible = movementsContainer.style.display === 'block';
-                            movementsContainer.style.display = isVisible ? 'none' : 'block';
-                        });
-
-                        item.appendChild(discSection);
-                        item.appendChild(movementsContainer);
-                        musicList.appendChild(item);
+                    const tracksContainer = document.createElement('div');
+                    tracksContainer.classList.add('tracks-container');
+                    row.tracks.forEach(track => {
+                        const trackDiv = document.createElement('div');
+                        trackDiv.classList.add('track');
+                        trackDiv.innerHTML = track.name;
+                        trackDiv.onclick = function() {
+                            playTrack(track.url);
+                        };
+                        tracksContainer.appendChild(trackDiv);
                     });
-                }
 
-                // Now that music is loaded, show the "Full Collection" button
-                const fullCollectionBtn = document.getElementById("full-collection-btn");
-                fullCollectionBtn.style.display = 'block'; // Show the button
-            })
-            .catch(error => {
-                console.error('Error fetching music:', error);
+                    item.appendChild(tracksContainer);
+                    musicList.appendChild(item);
+                });
             });
         }
 
-        function updateCurrentSong(title, src) {
-            const currentSongText = document.getElementById('current-song');
-            const audioPlayer = document.getElementById('audio-player');
-            const audioSource = document.getElementById('audio-source');
-
-            currentSongText.textContent = `Now Playing: ${title}`;
-            audioSource.src = src;
-            audioPlayer.load(); // Reload the audio element
+        function playTrack(url) {
+            const player = document.getElementById("audio-player");
+            const source = document.getElementById("audio-source");
+            source.src = url;
+            player.load();
+            player.play();
+            document.getElementById("current-song").textContent = "Now Playing: " + url;
         }
 
-        function setupAudioPlayer() {
-            const audioPlayer = document.getElementById('audio-player');
-            const volumeBar = document.getElementById('volume-bar');
-
-            audioPlayer.volume = volumeBar.value / 100;
-
-            volumeBar.addEventListener('input', function () {
-                audioPlayer.volume = volumeBar.value / 100;
-            });
+        function changeVolume() {
+            const player = document.getElementById("audio-player");
+            const volume = document.getElementById("volume-bar").value / 100;
+            player.volume = volume;
         }
 
         function searchMusic() {
-            const searchQuery = document.getElementById('search').value.toLowerCase();
-            const musicItems = document.querySelectorAll('.music-item');
-            musicItems.forEach(item => {
-                const discName = item.querySelector('.disc').textContent.toLowerCase();
-                const movements = item.querySelector('.movements');
-                if (discName.includes(searchQuery)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
+            const query = document.getElementById("search").value.toLowerCase();
+            const items = document.getElementsByClassName("music-item");
+
+            Array.from(items).forEach(item => {
+                const title = item.querySelector("h3").textContent.toLowerCase();
+                item.style.display = title.includes(query) ? 'block' : 'none';
             });
         }
-
-        // Post a comment to the Google Sheet
-        function postComment() {
-            const commentInput = document.getElementById('comment-input');
-            const commentText = commentInput ? commentInput.value : ''; // Use conditional check
-            if (commentText.trim() === '') {
-                alert('Please write a comment!');
-                return;
-            }
-            
-            // Send the comment to Google Sheets (add the Google Sheets integration)
-            const data = {
-                'comment': commentText
-            };
-
-            fetch(googleSheetUrl, {
-                method: 'POST',
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(responseData => {
-                alert('Comment posted successfully!');
-                commentInput.value = ''; // Clear the comment input after posting
-                loadComments(); // Reload comments after posting
-            })
-            .catch(error => {
-                console.error('Error posting comment:', error);
-                alert('Failed to post comment.');
-            });
-        }
-
-        // Load comments from Google Sheet
-        function loadComments() {
-            fetch(googleSheetUrl)
-            .then(response => response.json())
-            .then(data => {
-                const commentList = document.getElementById('comment-list');
-                commentList.innerHTML = '';
-                data.forEach(comment => {
-                    const commentDiv = document.createElement('div');
-                    commentDiv.textContent = comment.comment;
-                    commentList.appendChild(commentDiv);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading comments:', error);
-            });
-        }
-
-        // Initialize the music display and load comments
-        displayMusic();
-        loadComments();
     </script>
 </body>
 </html>
